@@ -1,0 +1,4 @@
+Copyright 2014 Tallinn University
+
+List of authors:
+Pjotr Savitski <pjotr.savitski@tlu.ee>
