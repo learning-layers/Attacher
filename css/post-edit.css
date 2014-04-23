@@ -1,5 +1,3 @@
-<?php
-
 /**
  * Code contributed to the Learning Layers project
  * http://www.learning-layers.eu
@@ -21,23 +19,6 @@
  * limitations under the License.
  */
 
-/*
-Plugin Name: Attacher
-Plugin URI: http://github.com/learning-layers/Attacher
-Description: Attacher WordPress Plugin
-Version: 0.0.1
-Author: Pjotr Savitski
-Author URI: http://github.com/learning-layers
-License: Apache License, Version 2.0
-Text Domain: attacher
-*/
-
-define( 'ATTACHER_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'ATTACHER_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-
-require_once( ATTACHER_PLUGIN_DIR . 'classes/class.attacher.php' );
-
-register_activation_hook( __FILE__ , array( 'AttacherPlugin', 'plugin_activation' ) );
-register_deactivation_hook( __FILE__, array( 'AttacherPlugin', 'plugin_deactivation' ) );
-
-add_action( 'init', array( 'AttacherPlugin', 'init' ) );
+.attacher-collection-tagcloud a.selected {
+    color: red;
+}
