@@ -93,7 +93,7 @@ testData.collections = {
                 $(this).find('.placeholder').remove();
                 var tmp_href = ui.draggable.find('a').attr('href');
                 var tmp_content = '<a href="'+tmp_href+'" target="_blank">'+tmp_href+'</a>';
-                // TODO Need to handle the case with non-tinymce editor
+                // Handling both cases, tinymce active and inactive
                 if (!tinymce.activeEditor.isHidden()) {
                     tinymce.activeEditor.execCommand('mceInsertContent', false, tmp_content);
                 } else {
@@ -104,11 +104,15 @@ testData.collections = {
     }
 
     $(document).ready(function() {
+        // Authenticate and load user
+        // Notify user and stop if it fails
+        // Load collections and populate the select (it might be a good idea to create the whole thing)
+        // Hook up the change event for collections
+        
         var tmp_collections_select = $('#attacher-resources').find('select[name="attacher-collection"]');
         var tmp_collection_tagcloud = $('#attacher-resources').find('.attacher-collection-tagcloud');
         var tmp_collection_resources = $('#attacher-resources').find('.attacher-collection-resources');
         var tmp_collection_show_untagged = $('#attacher-resources').find('input[name="attacher-collection-show-untagged"]');
-        var tmp_collection_dropoff_point = $('#attacher-resources').find('.attacher-dropoff-point');
         
         $.each(testData.collections, function(key, value) {
             tmp_collections_select.append('<option value="'+key+'">'+value.title+'</option>');
@@ -158,5 +162,44 @@ testData.collections = {
         });
         
         attacher_initialize_droppable($('#wp-content-editor-container'));
+        
+        // TESTING STUFF
+        // TODO
+        // Need to go through authentication initially
+        // If something fails, just notify user about the problem
+        // All subsequent calls should only be done after authentication
+        // was successful.
+        new SSAuthCheckCred().handle(
+            function(result) {
+                AttacherPluginData.key = result.key;
+                //console.log(result);
+                new SSUserLogin().handle(
+                    function(result) {
+                        AttacherPluginData.user = result.uri;
+                        //console.log(result);
+                        new SSCollUserRootGet().handle(
+                            function(result) {
+                                console.log(result);
+                            },
+                            function(result) {
+                                console.log(result);
+                            },
+                            AttacherPluginData.user,
+                            AttacherPluginData.key
+                        );
+                    },
+                    function(result) {
+                        console.log(result);
+                    },
+                    AttacherPluginData.service_username,
+                    AttacherPluginData.key
+                );
+            },
+            function(result) {
+                console.log(result);
+            },
+            AttacherPluginData.service_username,
+            AttacherPluginData.service_password
+        );
     });
 })( jQuery );

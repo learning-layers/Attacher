@@ -62,9 +62,14 @@ class AttacherPlugin {
         if ( is_admin() ) {
             add_action( 'add_meta_boxes', array( 'AttacherPlugin', 'addMetaBoxes' ) );
             add_action( 'admin_enqueue_scripts', array( 'AttacherPlugin', 'adminEnqueueScripts' ) );
+            add_action( 'admin_menu', array( 'AttacherPlugin', 'addMenuPages' ) );
         }
     }
     
+    /**
+     * Return text domain
+     * @return string
+     */
     public static function getTextDomain() {
         return self::TEXT_DOMAIN;
     }
@@ -103,8 +108,8 @@ class AttacherPlugin {
     }
     
     /**
-     * 
-     * @param type $hook
+     * Enqueue admin scripts
+     * @param string $hook
      */
     public static function adminEnqueueScripts( $hook ) {
         global $post;
@@ -112,11 +117,64 @@ class AttacherPlugin {
         if ( $hook == 'post-new.php' || $hook == 'post.php' ) {
             if ( $post && 'post' == $post->post_type ) {
                 wp_register_script( 'attacher-post-edit', ATTACHER_PLUGIN_URL . 'js/post-edit.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-droppable' ) );
+                wp_localize_script( 'attacher-post-edit', 'AttacherPluginData', array(
+                    'service_username' => get_option( 'attacher_service_username', '' ),
+                    'service_password' => get_option( 'attacher_service_password', '' ),
+                ));
                 wp_enqueue_script( 'attacher-post-edit' );
                 wp_register_style( 'attacher-post-edit', ATTACHER_PLUGIN_URL . 'css/post-edit.css' );
                 wp_enqueue_style( 'attacher-post-edit' );
                 wp_enqueue_style( 'attacher-jquery-ui', 'http://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css' );
+                self::enqueueSemanticServerClientSideScripts();
             }
         }
+    }
+    
+    /**
+     * Enqueue SocialSemanticServerClientSide scripts
+     */
+    public static function enqueueSemanticServerClientSideScripts() {
+        $sss_client_side_url = get_option( 'attacher_service_url', '');
+        
+        $scripts = array(
+            'jsglobals' => 'JSUtilities/JSGlobals.js',
+            'ssglobals' => '/SSSClientInterfaceGlobals/globals/SSGlobals.js',
+            'ssvaru' => 'SSSClientInterfaceGlobals/globals/SSVarU.js',
+            'ssusereventconnwrapper' => 'SSSClientInterfaceREST/connectors/wrapper/SSUserEventConnWrapper.js',
+            'ssauthconns' => 'SSSClientInterfaceREST/connectors/SSAuthConns.js',
+            'sscollconns' => 'SSSClientInterfaceREST/connectors/SSCollConns.js',
+            'ssuserconns' => 'SSSClientInterfaceREST/connectors/SSUserConns.js',
+        );
+        
+        foreach ( $scripts as $s_key => $s_val ) {
+            wp_enqueue_script( "attacher-{$s_key}-js", $sss_client_side_url . $s_val );
+        }
+    }
+    
+    /**
+     * Register settings
+     */
+    public static function registerSettings() {
+        register_setting( 'attacher-settings-group', 'attacher_service_url' );
+        register_setting( 'attacher-settings-group', 'attacher_service_username' );
+        register_setting( 'attacher-settings-group', 'attacher_service_password' );
+    }
+    
+    /**
+     * Add administration menu pages
+     */
+    public static function addMenuPages() {
+        add_options_page( __( 'Attacher', self::getTextDomain() ), __( 'Attacher settings', self::getTextDomain() ), 'manage_options', 'attacher', array( 'AttacherPlugin', 'loadSettingsPage' ) );
+        
+        if (current_user_can( 'manage_options' ) ) {
+            add_action( 'admin_init', array( 'AttacherPlugin', 'registerSettings' ) );
+        }
+    }
+
+        /**
+     * Serves settings page
+     */
+    public static function loadSettingsPage() {
+        include( ATTACHER_PLUGIN_DIR . '/views/settings-page.php');
     }
 }
