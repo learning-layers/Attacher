@@ -19,63 +19,111 @@
  * limitations under the License.
  */
 
-var testData = {};
-testData.collections = {
-    1: {
-        title: 'Collection 1',
-        uri: 'http://collections.com/1/',
-        tags: {
-            1: {
-                tag: 'first',
-                weight: 2
-            },
-            2: {
-                tag: 'second',
-                weight: 5
-            },
-            3: {
-                tag: 'third',
-                weight: 1.5
-            }
-        },
-        resources: {
-            1: {
-                title: 'Resource 1',
-                uri: 'http://collections.com/1/resources/1/',
-                tags: ['first', 'second', 'third']
-            },
-            2: {
-                title: 'Resource 2',
-                uri: 'http://collections.com/1/resources/2/',
-                tags: ['second']
-            },
-            3: {
-                title: 'Resource 3',
-                uri: 'http://collections.com/1/resources/3/',
-                tags: []
-            }
-        }
-    },
-    2: {
-        title: 'Collection 2',
-        uri: 'http://collections.com/2/',
-        tags: {
-            1: {
-                tag: 'fourth',
-                weight: 2
-            }
-        },
-        resources: {}
-    },
-    3: {
-        title: 'Collection 3',
-        uri: 'http://collections.com/3/',
-        tags: {},
-        resources: {}
-    }
-};
-
+/**
+ * 
+ * @param {object} $ jQuery object
+ */
 (function($) {
+    /**
+     * A callback function to display error message to a user
+     */
+    function attacher_service_error() {
+        alert('SocialSemanticService Communication Error');
+    }
+
+    /**
+     * A service call that would authenticate a user
+     * @param {function} callback         Success callback, is given result object
+     * @param {function} error_callback   Error collback
+     */
+    function attacher_service_get_root_collection(callback, error_callback) {
+        new SSCollUserRootGet().handle(
+                function(result) {
+                    callback(result);
+                },
+                function(result) {
+                    error_callback();
+                },
+                AttacherData.user,
+                AttacherData.key
+                );
+    }
+
+    /**
+     * A service call to get cumulated collection tags
+     * @param {function} callback         Success callback, is given result object
+     * @param {function} error_callback   Erro callback
+     * @param {string} collection_uri     Collection URI
+     */
+    function attacher_service_get_collection_tags(callback, error_callback, collection_uri) {
+        new SSCollUserCumulatedTagsGet().handle(
+                function(result) {
+                    callback(result);
+                },
+                function(result) {
+                    error_callback();
+                },
+                AttacherData.user,
+                AttacherData.key,
+                collection_uri
+                );
+    }
+
+    /**
+     * A service call to get collection with entries
+     * @param {function} callback         Success callback, is given result object
+     * @param {function} error_callback   Error callback
+     * @param {function} collection_uri   Collection URI
+     */
+    function attacher_service_get_collection_with_entries(callback, error_callback, collection_uri) {
+        new SSCollUserWithEntries().handle(
+                function(result) {
+                    callback(result);
+                },
+                function(result) {
+                    error_callback();
+                },
+                AttacherData.user,
+                AttacherData.key,
+                collection_uri
+                );
+    }
+
+    /**
+     * Obtains service token for an account. Makes a second call on success that
+     * will bring the user URI. Both are added to AttacherData object to be used
+     * later on.
+     * @param {function} callback         Success callback, is given result object
+     * @param {function} error_callback   Error callback
+     */
+    function attacher_service_authenticate(callback, error_callback) {
+        new SSAuthCheckCred().handle(
+                function(result) {
+                    AttacherData.key = result.key;
+                    new SSUserLogin().handle(
+                            function(result) {
+                                AttacherData.user = result.uri;
+                                callback();
+                            },
+                            function(result) {
+                                error_callback();
+                            },
+                            AttacherData.service_username,
+                            AttacherData.key
+                            );
+                },
+                function(result) {
+                    error_callback();
+                },
+                AttacherData.service_username,
+                AttacherData.service_password
+                );
+    }
+
+    /**
+     * Initialize draggable
+     * @param {object} holder jQuery selector Object
+     */
     function attacher_initialize_draggable(holder) {
         holder.find('li').draggable({
             appendTo: 'body',
@@ -84,6 +132,10 @@ testData.collections = {
         });
     }
 
+    /**
+     * Initialize droppable
+     * @param {object} holder jQuery selector Object
+     */
     function attacher_initialize_droppable(holder) {
         holder.droppable({
             activeClass: 'ui-state-default',
@@ -92,7 +144,7 @@ testData.collections = {
             drop: function(event, ui) {
                 $(this).find('.placeholder').remove();
                 var tmp_href = ui.draggable.find('a').attr('href');
-                var tmp_content = '<a href="'+tmp_href+'" target="_blank">'+tmp_href+'</a>';
+                var tmp_content = '<a href="' + tmp_href + '" target="_blank">' + tmp_href + '</a>';
                 // Handling both cases, tinymce active and inactive
                 if (!tinymce.activeEditor.isHidden()) {
                     tinymce.activeEditor.execCommand('mceInsertContent', false, tmp_content);
@@ -103,103 +155,88 @@ testData.collections = {
         });
     }
 
-    $(document).ready(function() {
-        // Authenticate and load user
-        // Notify user and stop if it fails
-        // Load collections and populate the select (it might be a good idea to create the whole thing)
-        // Hook up the change event for collections
-        
-        var tmp_collections_select = $('#attacher-resources').find('select[name="attacher-collection"]');
-        var tmp_collection_tagcloud = $('#attacher-resources').find('.attacher-collection-tagcloud');
-        var tmp_collection_resources = $('#attacher-resources').find('.attacher-collection-resources');
-        var tmp_collection_show_untagged = $('#attacher-resources').find('input[name="attacher-collection-show-untagged"]');
-        
-        $.each(testData.collections, function(key, value) {
-            tmp_collections_select.append('<option value="'+key+'">'+value.title+'</option>');
-        });
-        
-        tmp_collections_select.on('change', function() {
-            var tmp_collection = testData.collections[$(this).val()];
-            tmp_collection.ID = $(this).val();
-            
-            
-            tmp_collection_tagcloud.empty();
-            tmp_collection_resources.empty();
-            tmp_collection_show_untagged.prop('checked', false);
-            
-            $.each(tmp_collection.tags, function(key, value) {
-                tmp_collection_tagcloud.append('  <a href="#" data-tag="'+value.tag+'">'+value.tag+'</a>');
-            });
-            
-            tmp_collection_tagcloud.find('a').on('click', function(e) {
-                e.preventDefault();
-                tmp_collection_resources.empty();
-                tmp_collection_show_untagged.prop('checked', false);
-                tmp_collection_tagcloud.find('a').removeClass('selected');
-                $(e.target).addClass('selected');
-                $.each(testData.collections[tmp_collection.ID].resources, function(key, value) {
-                    if (value.tags.indexOf($(e.target).data('tag')) !== -1) {
-                        tmp_collection_resources.append('<li><a href="'+value.uri+'" target="_blank">'+value.title+'</a></li>');
-                    }
-                });
-                attacher_initialize_draggable( tmp_collection_resources );
-            });
-        });
-        tmp_collections_select.trigger('change');
-        
-        tmp_collection_show_untagged.on('click', function() {
-            var tmp_collection = testData.collections[tmp_collections_select.val()];
-            tmp_collection_resources.empty();
-            if ($(this).is(':checked')) {
-                tmp_collection_tagcloud.find('a').removeClass('selected');
-                $.each(testData.collections[tmp_collection.ID].resources, function(key, value) {
-                    if (value.tags.length === 0) {
-                        tmp_collection_resources.append('<li><a href="'+value.uri+'" target="_blank">'+value.title+'</a></li>');
-                    }
-                });
-                attacher_initialize_draggable( tmp_collection_resources );
+    /**
+     * Callback that populates collections select. Used by service call.
+     * @param {object} result Service call result object
+     */
+    function attacher_populate_collections(result) {
+        /**
+         * Callback that populates tagcloud
+         * @param {object} result Service call result object
+         */
+        function deal_with_tags(result) {
+            /**
+             * Callback that populates resources
+             * @param {object} result   Service call result object
+             */
+            function deal_with_resources(result) {
+                var collection_resources = $('#attacher-resources').find('.attacher-collection-resources');
+
+                if (result.coll.entries) {
+                    $.each(result.coll.entries, function(key, entry) {
+                        if ('coll' !== entry.entityType) {
+                            collection_resources.append('<li><a href="' + entry.uri + '" target="_blank">' + entry.label + '</a></li>');
+                        }
+                    });
+                    attacher_initialize_draggable(collection_resources);
+                }
             }
+
+            var collections_select = $('#attacher-resources').find('select[name="attacher-collection"]');
+            var collection_tagcloud = $('#attacher-resources').find('.attacher-collection-tagcloud');
+            var collection_resources = $('#attacher-resources').find('.attacher-collection-resources');
+
+
+            if (result.tagFrequs) {
+                $.each(result.tagFrequs, function(key, tag) {
+                    collection_tagcloud.append(' <a href="#" data-tag="'+tag.label+'" data-frequ="'+tag.frequ+'">' + tag.label + ' (' + tag.frequ + ')</a>');
+                });
+
+                collection_tagcloud.find('a').on('click', function(e) {
+                    e.preventDefault();
+                    collection_resources.empty();
+                    collection_tagcloud.find('a').removeClass('selected');
+                    $(e.target).addClass('selected');
+
+                    attacher_service_get_collection_with_entries(deal_with_resources, attacher_service_error, collections_select.val());
+                });
+            }
+        }
+
+        var collections_select = $('#attacher-resources').find('select[name="attacher-collection"]');
+        var collection_tagcloud = $('#attacher-resources').find('.attacher-collection-tagcloud');
+        var collection_resources = $('#attacher-resources').find('.attacher-collection-resources');
+
+        collections_select.append('<option value="' + result.coll.uri + '">' + result.coll.label + '</option>');
+        if (result.coll.entries) {
+            $.each(result.coll.entries, function(key, coll) {
+                if ('coll' === coll.entityType) {
+                    collections_select.append('<option value="' + coll.uri + '">' + coll.label + '</option>');
+                }
+            });
+        }
+
+        collections_select.on('change', function() {
+            var collection_uri = $(this).val();
+
+            collection_tagcloud.empty();
+            collection_resources.empty();
+
+            attacher_service_get_collection_tags(deal_with_tags, attacher_service_error, collection_uri);
         });
-        
+
+        collections_select.trigger('change');
+    }
+
+    /**
+     * Gets collecions list and initializes as needed.
+     */
+    function attacher_initialize_resources() {
+        attacher_service_get_root_collection(attacher_populate_collections, attacher_service_error);
+    }
+
+    $(document).ready(function() {
+        attacher_service_authenticate(attacher_initialize_resources, attacher_service_error);
         attacher_initialize_droppable($('#wp-content-editor-container'));
-        
-        // TESTING STUFF
-        // TODO
-        // Need to go through authentication initially
-        // If something fails, just notify user about the problem
-        // All subsequent calls should only be done after authentication
-        // was successful.
-        new SSAuthCheckCred().handle(
-            function(result) {
-                AttacherData.key = result.key;
-                //console.log(result);
-                new SSUserLogin().handle(
-                    function(result) {
-                        AttacherData.user = result.uri;
-                        //console.log(result);
-                        new SSCollUserRootGet().handle(
-                            function(result) {
-                                console.log(result);
-                            },
-                            function(result) {
-                                console.log(result);
-                            },
-                            AttacherData.user,
-                            AttacherData.key
-                        );
-                    },
-                    function(result) {
-                        console.log(result);
-                    },
-                    AttacherData.service_username,
-                    AttacherData.key
-                );
-            },
-            function(result) {
-                console.log(result);
-            },
-            AttacherData.service_username,
-            AttacherData.service_password
-        );
     });
-})( jQuery );
+})(jQuery);

@@ -95,11 +95,6 @@ class Attacher_Plugin {
         echo '<select name="attacher-collection">';
         echo '</select>';
         
-        echo '<div>';
-        echo '<input type="checkbox" name="attacher-collection-show-untagged" value="1" />';
-        echo __( 'Show untagged', self::getTextDomain() );
-        echo '</div>';
-        
         echo '<div class="attacher-collection-tagcloud">';
         echo '</div>';
         
