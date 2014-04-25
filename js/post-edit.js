@@ -171,11 +171,11 @@ testData.collections = {
         // was successful.
         new SSAuthCheckCred().handle(
             function(result) {
-                AttacherPluginData.key = result.key;
+                AttacherData.key = result.key;
                 //console.log(result);
                 new SSUserLogin().handle(
                     function(result) {
-                        AttacherPluginData.user = result.uri;
+                        AttacherData.user = result.uri;
                         //console.log(result);
                         new SSCollUserRootGet().handle(
                             function(result) {
@@ -184,22 +184,22 @@ testData.collections = {
                             function(result) {
                                 console.log(result);
                             },
-                            AttacherPluginData.user,
-                            AttacherPluginData.key
+                            AttacherData.user,
+                            AttacherData.key
                         );
                     },
                     function(result) {
                         console.log(result);
                     },
-                    AttacherPluginData.service_username,
-                    AttacherPluginData.key
+                    AttacherData.service_username,
+                    AttacherData.key
                 );
             },
             function(result) {
                 console.log(result);
             },
-            AttacherPluginData.service_username,
-            AttacherPluginData.service_password
+            AttacherData.service_username,
+            AttacherData.service_password
         );
     });
 })( jQuery );

@@ -25,7 +25,7 @@
  *
  * @author pjotr
  */
-class AttacherPlugin {
+class Attacher_Plugin {
     const TEXT_DOMAIN = 'attacher';
     
     private static $initiated = FALSE;
@@ -60,9 +60,9 @@ class AttacherPlugin {
         self::$initiated = TRUE;
         
         if ( is_admin() ) {
-            add_action( 'add_meta_boxes', array( 'AttacherPlugin', 'addMetaBoxes' ) );
-            add_action( 'admin_enqueue_scripts', array( 'AttacherPlugin', 'adminEnqueueScripts' ) );
-            add_action( 'admin_menu', array( 'AttacherPlugin', 'addMenuPages' ) );
+            add_action( 'add_meta_boxes', array( 'Attacher_Plugin', 'addMetaBoxes' ) );
+            add_action( 'admin_enqueue_scripts', array( 'Attacher_Plugin', 'adminEnqueueScripts' ) );
+            add_action( 'admin_menu', array( 'Attacher_Plugin', 'addMenuPages' ) );
         }
     }
     
@@ -80,7 +80,7 @@ class AttacherPlugin {
     public static function addMetaBoxes() {
         add_meta_box( 'attacher-resources',
                 __( 'Resources', self::getTextDomain() ),
-                array( 'AttacherPlugin', 'addResourcesMetaBox'),
+                array( 'Attacher_Plugin', 'addResourcesMetaBox'),
                 'post',
                 'side',
                 'high'
@@ -117,7 +117,7 @@ class AttacherPlugin {
         if ( $hook == 'post-new.php' || $hook == 'post.php' ) {
             if ( $post && 'post' == $post->post_type ) {
                 wp_register_script( 'attacher-post-edit', ATTACHER_PLUGIN_URL . 'js/post-edit.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-droppable' ) );
-                wp_localize_script( 'attacher-post-edit', 'AttacherPluginData', array(
+                wp_localize_script( 'attacher-post-edit', 'AttacherData', array(
                     'service_username' => get_option( 'attacher_service_username', '' ),
                     'service_password' => get_option( 'attacher_service_password', '' ),
                 ));
@@ -164,10 +164,10 @@ class AttacherPlugin {
      * Add administration menu pages
      */
     public static function addMenuPages() {
-        add_options_page( __( 'Attacher', self::getTextDomain() ), __( 'Attacher settings', self::getTextDomain() ), 'manage_options', 'attacher', array( 'AttacherPlugin', 'loadSettingsPage' ) );
+        add_options_page( __( 'Attacher', self::getTextDomain() ), __( 'Attacher settings', self::getTextDomain() ), 'manage_options', 'attacher', array( 'Attacher_Plugin', 'loadSettingsPage' ) );
         
         if (current_user_can( 'manage_options' ) ) {
-            add_action( 'admin_init', array( 'AttacherPlugin', 'registerSettings' ) );
+            add_action( 'admin_init', array( 'Attacher_Plugin', 'registerSettings' ) );
         }
     }
 

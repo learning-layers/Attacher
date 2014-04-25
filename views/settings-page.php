@@ -22,11 +22,11 @@
  */
 
 if ( !current_user_can( 'manage_options' ) ) {
-    wp_die( __( 'Insufficient privileges.', AttacherPlugin::getTextDomain() ) );
+    wp_die( __( 'Insufficient privileges.', Attacher_Plugin::getTextDomain() ) );
 }
 ?>
 <div class="wrap">
-    <h2><?php _e( 'Attacher settings', AttacherPlugin::getTextDomain() ); ?></h2> 
+    <h2><?php _e( 'Attacher settings', Attacher_Plugin::getTextDomain() ); ?></h2> 
     <form method="post" action="options.php">
         <?php settings_fields( 'attacher-settings-group' ); ?>
         <?php do_settings_sections ( 'attacher-settings-group' ); ?>
@@ -34,21 +34,21 @@ if ( !current_user_can( 'manage_options' ) ) {
         <table class="form-table">
             <tbody>
                 <tr valign="top">
-                    <th scope="row"><?php _e( 'SocialSemanticServerClientSide URL', AttacherPlugin::getTextDomain() ); ?></th>
+                    <th scope="row"><?php _e( 'SocialSemanticServerClientSide URL', Attacher_Plugin::getTextDomain() ); ?></th>
                     <td>
                         <input type="text" id="attacher_service_url" name="attacher_service_url" value="<?php echo get_option( 'attacher_service_url', '' ); ?>" class="regular-text" />
                     </td>
                 </tr>
                 
                 <tr valign="top">
-                    <th scope="row"><?php _e( 'SocialSemanticServer Username', AttacherPlugin::getTextDomain() ); ?></th>
+                    <th scope="row"><?php _e( 'SocialSemanticServer Username', Attacher_Plugin::getTextDomain() ); ?></th>
                     <td>
                         <input type="text" id="attacher_service_username" name="attacher_service_username" value="<?php echo get_option( 'attacher_service_username', '' ); ?>" class="regular-text" />
                     </td>
                 </tr>
                 
                 <tr valign="top">
-                    <th scope="row"><?php _e( 'SocialSemanticServer Password', AttacherPlugin::getTextDomain() ); ?></th>
+                    <th scope="row"><?php _e( 'SocialSemanticServer Password', Attacher_Plugin::getTextDomain() ); ?></th>
                     <td>
                         <input type="text" id="attacher_service_password" name="attacher_service_password" value="<?php echo get_option( 'attacher_service_password', '' ); ?>" class="regular-text" />
                     </td>
