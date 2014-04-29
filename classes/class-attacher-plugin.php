@@ -153,13 +153,14 @@ class Attacher_Plugin {
         $sss_client_side_url = get_option( 'attacher_service_url', '');
         
         $scripts = array(
-            'jsglobals' => 'JSUtilities/JSGlobals.js',
-            'ssglobals' => '/SSSClientInterfaceGlobals/globals/SSGlobals.js',
-            'ssvaru' => 'SSSClientInterfaceGlobals/globals/SSVarU.js',
-            'ssusereventconnwrapper' => 'SSSClientInterfaceREST/connectors/wrapper/SSUserEventConnWrapper.js',
-            'ssauthconns' => 'SSSClientInterfaceREST/connectors/SSAuthConns.js',
-            'sscollconns' => 'SSSClientInterfaceREST/connectors/SSCollConns.js',
-            'ssuserconns' => 'SSSClientInterfaceREST/connectors/SSUserConns.js',
+            'jsglobals'                 => 'JSUtilities/JSGlobals.js',
+            'ssglobals'                 => '/SSSClientInterfaceGlobals/globals/SSGlobals.js',
+            'ssvaru'                    => 'SSSClientInterfaceGlobals/globals/SSVarU.js',
+            'ssusereventconnwrapper'    => 'SSSClientInterfaceREST/connectors/wrapper/SSUserEventConnWrapper.js',
+            'ssauthconns'               => 'SSSClientInterfaceREST/connectors/SSAuthConns.js',
+            'sscollconns'               => 'SSSClientInterfaceREST/connectors/SSCollConns.js',
+            'ssuserconns'               => 'SSSClientInterfaceREST/connectors/SSUserConns.js',
+            'sstagconns'                => 'SSSClientInterfaceREST/connectors/SSTagConns.js',
         );
         
         foreach ( $scripts as $s_key => $s_val ) {

@@ -32,12 +32,30 @@
     }
 
     /**
-     * A service call that would authenticate a user
+     * A service call that would get user root collection
      * @param {function} callback         Success callback, is given result object
      * @param {function} error_callback   Error collback
      */
     function attacher_service_get_root_collection(callback, error_callback) {
         new SSCollUserRootGet().handle(
+                function(result) {
+                    callback(result);
+                },
+                function(result) {
+                    error_callback();
+                },
+                AttacherData.user,
+                AttacherData.key
+                );
+    }
+    
+    /**
+     * A service call that would bring all user collections
+     * @param {function} callback         Success callback, is given result object
+     * @param {function} error_callback   Error collback
+     */
+    function attacher_service_get_user_collections(callback, error_callback) {
+        new SSCollsUserWithEntries().handle(
                 function(result) {
                     callback(result);
                 },
@@ -207,12 +225,9 @@
         var collection_tagcloud = $('#attacher-resources').find('.attacher-collection-tagcloud');
         var collection_resources = $('#attacher-resources').find('.attacher-collection-resources');
 
-        collections_select.append('<option value="' + result.coll.uri + '">' + result.coll.label + '</option>');
-        if (result.coll.entries) {
-            $.each(result.coll.entries, function(key, coll) {
-                if ('coll' === coll.entityType) {
-                    collections_select.append('<option value="' + coll.uri + '">' + coll.label + '</option>');
-                }
+        if (result.colls) {
+            $.each(result.colls, function(key, coll) {
+                collections_select.append('<option value="' + coll.uri + '">' + coll.label + '</option>');
             });
         }
 
@@ -221,8 +236,10 @@
 
             collection_tagcloud.empty();
             collection_resources.empty();
-
-            attacher_service_get_collection_tags(deal_with_tags, attacher_service_error, collection_uri);
+            
+            if (collection_uri) {
+                attacher_service_get_collection_tags(deal_with_tags, attacher_service_error, collection_uri);
+            }
         });
 
         collections_select.trigger('change');
@@ -232,7 +249,7 @@
      * Gets collecions list and initializes as needed.
      */
     function attacher_initialize_resources() {
-        attacher_service_get_root_collection(attacher_populate_collections, attacher_service_error);
+        attacher_service_get_user_collections(attacher_populate_collections, attacher_service_error);
     }
 
     $(document).ready(function() {
