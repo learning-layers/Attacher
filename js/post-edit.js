@@ -109,8 +109,24 @@
 
 
             if (result.tagFrequs) {
+                var fontMin = 10;
+                var fontMax = 20;
+                var frequMin = 1;
+                var frequMax = 1;
                 $.each(result.tagFrequs, function(key, tag) {
-                    collection_tagcloud.append(' <a href="#" data-tag="' + tag.label + '" data-frequ="' + tag.frequ + '">' + tag.label + ' (' + tag.frequ + ')</a>');
+                    if (0 === key) {
+                        frequMin = tag.frequ;
+                        frequMax = tag.frequ;
+                    }
+                    if (tag.frequ > frequMax) {
+                        frequMax = tag.frequ;
+                    } else if (tag.frequ < frequMin) {
+                        frequMin = tag.frequ;
+                    }
+                });
+                $.each(result.tagFrequs, function(key, tag) {
+                    var fontSize = (tag.frequ == frequMin) ? fontMin : (tag.frequ / frequMax) * (fontMax - fontMin) + fontMin;
+                    collection_tagcloud.append(' <a href="#" data-tag="' + tag.label + '" data-frequ="' + tag.frequ + '" style="font-size:' + fontSize + 'pt;">' + tag.label + ' (' + tag.frequ + ')</a>');
                 });
 
                 collection_tagcloud.find('a').on('click', function(e) {
