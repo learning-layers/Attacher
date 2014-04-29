@@ -59,6 +59,8 @@ class Attacher_Plugin {
     public static function init_hooks() {
         self::$initiated = TRUE;
         
+        add_action( 'wp_enqueue_scripts', array( 'Attacher_Plugin', 'enqueueScripts' ) );
+        
         if ( is_admin() ) {
             add_action( 'add_meta_boxes', array( 'Attacher_Plugin', 'addMetaBoxes' ) );
             add_action( 'admin_enqueue_scripts', array( 'Attacher_Plugin', 'adminEnqueueScripts' ) );
@@ -124,6 +126,26 @@ class Attacher_Plugin {
     }
     
     /**
+     * Enqueue scripts
+     * @global WP_Post $post Current post
+     */
+    public static function enqueueScripts() {
+        global $post;
+
+        if ($post && 'post' == $post->post_type) {
+            wp_register_script('attacher-service', ATTACHER_PLUGIN_URL . 'js/service.js');
+            wp_localize_script('attacher-service', 'AttacherData', array(
+                'service_username' => get_option('attacher_service_username', ''),
+                'service_password' => get_option('attacher_service_password', ''),
+            ));
+            wp_enqueue_script( 'attacher-service' );
+            self::enqueueSemanticServerClientSideScripts();
+            wp_register_script( 'attacher-post-view', ATTACHER_PLUGIN_URL . 'js/post-view.js', array( 'jquery' ) );
+            wp_enqueue_script( 'attacher-post-view' );
+        }
+    }
+
+    /**
      * Enqueue admin scripts
      * @param string $hook
      */
@@ -132,16 +154,21 @@ class Attacher_Plugin {
         
         if ( $hook == 'post-new.php' || $hook == 'post.php' ) {
             if ( $post && 'post' == $post->post_type ) {
-                wp_register_script( 'attacher-post-edit', ATTACHER_PLUGIN_URL . 'js/post-edit.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-droppable' ) );
-                wp_localize_script( 'attacher-post-edit', 'AttacherData', array(
+                wp_register_script( 'attacher-service', ATTACHER_PLUGIN_URL . 'js/service.js');
+                wp_localize_script( 'attacher-service', 'AttacherData', array(
                     'service_username' => get_option( 'attacher_service_username', '' ),
                     'service_password' => get_option( 'attacher_service_password', '' ),
                 ));
+                wp_enqueue_script( 'attacher-service' );
+                self::enqueueSemanticServerClientSideScripts();
+                
+                wp_register_script( 'attacher-post-edit', ATTACHER_PLUGIN_URL . 'js/post-edit.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-droppable' ) );
                 wp_enqueue_script( 'attacher-post-edit' );
+                
                 wp_register_style( 'attacher-post-edit', ATTACHER_PLUGIN_URL . 'css/post-edit.css' );
                 wp_enqueue_style( 'attacher-post-edit' );
+                
                 wp_enqueue_style( 'attacher-jquery-ui', 'http://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css' );
-                self::enqueueSemanticServerClientSideScripts();
             }
         }
     }
@@ -161,6 +188,8 @@ class Attacher_Plugin {
             'sscollconns'               => 'SSSClientInterfaceREST/connectors/SSCollConns.js',
             'ssuserconns'               => 'SSSClientInterfaceREST/connectors/SSUserConns.js',
             'sstagconns'                => 'SSSClientInterfaceREST/connectors/SSTagConns.js',
+            'ssfileconns'               => 'SSSClientInterfaceREST/connectors/SSFileConns.js',
+            'ssfiledownload'            => 'SSSClientInterfaceREST/connectors/SSFileDownload.js',
         );
         
         foreach ( $scripts as $s_key => $s_val ) {

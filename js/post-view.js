@@ -19,43 +19,32 @@
  * limitations under the License.
  */
 
-.attacher-collection-tagcloud a.selected {
-    color: red;
-}
-
-#attacher-resources .attacher-container {
-    margin: 10px 0px;
-}
-
-#attacher-resources .attacher-container label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-#attacher-resources .attacher-container label span {
-    font-weight: 600;
-}
-
-#attacher-resources .attacher-container label:before {
-    color: #888;
-    content: '\f325';
-    display: inline-block;
-    font: 400 20px/1 dashicons;
-    speak: none;
-    left: -1px;
-    padding: 0 5px 0 0;
-    position: relative;
-    top: 0;
-    text-decoration: none!important;
-    vertical-align: top;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-#attacher-resources .attacher-collection-tagcloud-container label:before {
-    content: '\f479';
-}
-
-#attacher-resources .attacher-collection-resources-container label:before {
-    content: '\f163';
-}
+/**
+ * 
+ * @param {object} $ jQuery object
+ */
+(function($) {
+    /**
+     * Initialize downloadable files found within the body
+     * @param {object} holder jQuery selector
+     */
+    function attacher_initialize_downloadable_files(holder) {
+        holder.find('a.attacher-downloadable-file').on('click', function(e) {
+            e.preventDefault();
+            // TODO Probably need to get entity info first, the download the file
+            attacher_service_download_file(attacher_service_error, $(this).attr('href'), $(this).data('label'));
+        });
+    }
+    
+    /**
+     * Initialize post view additional logic
+     * @returns {undefined}
+     */
+    function attacher_initialize_post_view() {
+        attacher_initialize_downloadable_files($('.entry-content'));
+    }
+    
+    $(document).ready(function() {
+        attacher_service_authenticate(attacher_initialize_post_view, attacher_service_error);
+    });
+})(jQuery);

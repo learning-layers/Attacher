@@ -25,120 +25,6 @@
  */
 (function($) {
     /**
-     * A callback function to display error message to a user
-     */
-    function attacher_service_error() {
-        alert('SocialSemanticService Communication Error');
-    }
-
-    /**
-     * A service call that would get user root collection
-     * @param {function} callback         Success callback, is given result object
-     * @param {function} error_callback   Error collback
-     */
-    function attacher_service_get_root_collection(callback, error_callback) {
-        new SSCollUserRootGet().handle(
-                function(result) {
-                    callback(result);
-                },
-                function(result) {
-                    error_callback();
-                },
-                AttacherData.user,
-                AttacherData.key
-                );
-    }
-    
-    /**
-     * A service call that would bring all user collections
-     * @param {function} callback         Success callback, is given result object
-     * @param {function} error_callback   Error collback
-     */
-    function attacher_service_get_user_collections(callback, error_callback) {
-        new SSCollsUserWithEntries().handle(
-                function(result) {
-                    callback(result);
-                },
-                function(result) {
-                    error_callback();
-                },
-                AttacherData.user,
-                AttacherData.key
-                );
-    }
-
-    /**
-     * A service call to get cumulated collection tags
-     * @param {function} callback         Success callback, is given result object
-     * @param {function} error_callback   Erro callback
-     * @param {string} collection_uri     Collection URI
-     */
-    function attacher_service_get_collection_tags(callback, error_callback, collection_uri) {
-        new SSCollUserCumulatedTagsGet().handle(
-                function(result) {
-                    callback(result);
-                },
-                function(result) {
-                    error_callback();
-                },
-                AttacherData.user,
-                AttacherData.key,
-                collection_uri
-                );
-    }
-
-    /**
-     * A service call to get collection with entries
-     * @param {function} callback         Success callback, is given result object
-     * @param {function} error_callback   Error callback
-     * @param {function} collection_uri   Collection URI
-     */
-    function attacher_service_get_collection_with_entries(callback, error_callback, collection_uri) {
-        new SSCollUserWithEntries().handle(
-                function(result) {
-                    callback(result);
-                },
-                function(result) {
-                    error_callback();
-                },
-                AttacherData.user,
-                AttacherData.key,
-                collection_uri
-                );
-    }
-
-    /**
-     * Obtains service token for an account. Makes a second call on success that
-     * will bring the user URI. Both are added to AttacherData object to be used
-     * later on.
-     * @param {function} callback         Success callback, is given result object
-     * @param {function} error_callback   Error callback
-     */
-    function attacher_service_authenticate(callback, error_callback) {
-        new SSAuthCheckCred().handle(
-                function(result) {
-                    AttacherData.key = result.key;
-                    new SSUserLogin().handle(
-                            function(result) {
-                                AttacherData.user = result.uri;
-                                callback();
-                            },
-                            function(result) {
-                                error_callback();
-                            },
-                            AttacherData.service_username,
-                            AttacherData.key
-                            );
-                },
-                function(result) {
-                    error_callback();
-                },
-                AttacherData.service_username,
-                AttacherData.service_password
-                );
-    }
-
-    /**
      * Initialize draggable
      * @param {object} holder jQuery selector Object
      */
@@ -161,8 +47,8 @@
             scope: 'resources',
             drop: function(event, ui) {
                 $(this).find('.placeholder').remove();
-                var tmp_href = ui.draggable.find('a').attr('href');
-                var tmp_content = '<a href="' + tmp_href + '" target="_blank">' + tmp_href + '</a>';
+                var tmp_a = ui.draggable.find('a');
+                var tmp_content = '<a href="' + tmp_a.attr('href') + '" target="_blank" data-label="' + tmp_a.data('label') + '" class="' + tmp_a.attr('class') + '">' + tmp_a.data('label') + '</a>';
                 // Handling both cases, tinymce active and inactive
                 if (!tinymce.activeEditor.isHidden()) {
                     tinymce.activeEditor.execCommand('mceInsertContent', false, tmp_content);
@@ -170,6 +56,18 @@
                     QTags.insertContent(tmp_content);
                 }
             }
+        });
+    }
+    
+    /**
+     * Initialize downloadable files
+     * @param {object} holder jQuery selector
+     */
+    function attacher_initialize_downloadable_files(holder) {
+        holder.find('a.attacher-downloadable-file').on('click', function(e) {
+            e.preventDefault();
+            // TODO Probably need to get entity info first, the download the file
+            attacher_service_download_file(attacher_service_error, $(this).attr('href'), $(this).data('label'));
         });
     }
 
@@ -193,10 +91,15 @@
                 if (result.coll.entries) {
                     $.each(result.coll.entries, function(key, entry) {
                         if ('coll' !== entry.entityType) {
-                            collection_resources.append('<li><a href="' + entry.uri + '" target="_blank">' + entry.label + '</a></li>');
+                            var resource_class = 'attacher-resource';
+                            if ('file' == entry.entityType) {
+                                resource_class += ' attacher-downloadable-file';
+                            }
+                            collection_resources.append('<li><a href="' + entry.uri + '" target="_blank" class="' + resource_class + '" data-label="' + entry.label + '">' + entry.label + '</a></li>');
                         }
                     });
                     attacher_initialize_draggable(collection_resources);
+                    attacher_initialize_downloadable_files(collection_resources);
                 }
             }
 
@@ -207,7 +110,7 @@
 
             if (result.tagFrequs) {
                 $.each(result.tagFrequs, function(key, tag) {
-                    collection_tagcloud.append(' <a href="#" data-tag="'+tag.label+'" data-frequ="'+tag.frequ+'">' + tag.label + ' (' + tag.frequ + ')</a>');
+                    collection_tagcloud.append(' <a href="#" data-tag="' + tag.label + '" data-frequ="' + tag.frequ + '">' + tag.label + ' (' + tag.frequ + ')</a>');
                 });
 
                 collection_tagcloud.find('a').on('click', function(e) {
@@ -236,7 +139,7 @@
 
             collection_tagcloud.empty();
             collection_resources.empty();
-            
+
             if (collection_uri) {
                 attacher_service_get_collection_tags(deal_with_tags, attacher_service_error, collection_uri);
             }
