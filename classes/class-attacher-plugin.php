@@ -79,7 +79,7 @@ class Attacher_Plugin {
      */
     public static function addMetaBoxes() {
         add_meta_box( 'attacher-resources',
-                __( 'Resources', self::getTextDomain() ),
+                __( 'Attacher', self::getTextDomain() ),
                 array( 'Attacher_Plugin', 'addResourcesMetaBox'),
                 'post',
                 'side',
@@ -92,13 +92,34 @@ class Attacher_Plugin {
      * @param WP_Post $post Post object
      */
     public static function addResourcesMetaBox( $post ) {
-        echo '<select name="attacher-collection">';
-        echo '</select>';
-        
-        echo '<div class="attacher-collection-tagcloud">';
+        echo '<div class="attacher-container attacher-collection-container">';
+            echo '<label>';
+                echo '<span>';
+                    echo __( 'Collections', self::getTextDomain() );
+                echo '</span>';
+            echo '</label>';
+            echo '<select name="attacher-collection">';
+            echo '</select>';
         echo '</div>';
         
-        echo '<ul class="attacher-collection-resources">';
+        echo '<div class="attacher-container attacher-collection-tagcloud-container">';
+            echo '<label>';
+                echo '<span>';
+                    echo __( 'Tags', self::getTextDomain() );
+                echo '</span>';
+            echo '</label>';
+            echo '<div class="attacher-collection-tagcloud">';
+            echo '</div>';
+        echo '</div>';
+        
+        echo '<div class="attacher-container attacher-collection-resources-container">';
+            echo '<label>';
+                echo '<span>';
+                    echo __( 'Resources', self::getTextDomain() );
+                echo '</span>';
+            echo '</label>';
+            echo '<ul class="attacher-collection-resources">';
+            echo '</div>';
         echo '</div>';
     }
     

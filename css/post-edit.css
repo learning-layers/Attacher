@@ -22,3 +22,40 @@
 .attacher-collection-tagcloud a.selected {
     color: red;
 }
+
+#attacher-resources .attacher-container {
+    margin: 10px 0px;
+}
+
+#attacher-resources .attacher-container label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+#attacher-resources .attacher-container label span {
+    font-weight: 600;
+}
+
+#attacher-resources .attacher-container label:before {
+    color: #888;
+    content: '\f325';
+    display: inline-block;
+    font: 400 20px/1 dashicons;
+    speak: none;
+    left: -1px;
+    padding: 0 5px 0 0;
+    position: relative;
+    top: 0;
+    text-decoration: none!important;
+    vertical-align: top;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#attacher-resources .attacher-collection-tagcloud-container label:before {
+    content: '\f479';
+}
+
+#attacher-resources .attacher-collection-resources-container {
+    content: '\f163';
+}
