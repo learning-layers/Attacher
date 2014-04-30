@@ -65,6 +65,7 @@ class Attacher_Plugin {
             add_action( 'add_meta_boxes', array( 'Attacher_Plugin', 'addMetaBoxes' ) );
             add_action( 'admin_enqueue_scripts', array( 'Attacher_Plugin', 'adminEnqueueScripts' ) );
             add_action( 'admin_menu', array( 'Attacher_Plugin', 'addMenuPages' ) );
+            add_action( 'post_updated', array( 'Attacher_Plugin', 'savePost' ), 10, 2 );
         }
     }
     
@@ -201,6 +202,7 @@ class Attacher_Plugin {
      * Register settings
      */
     public static function registerSettings() {
+        register_setting( 'attacher-settings-group', 'attacher_service_rest_url' );
         register_setting( 'attacher-settings-group', 'attacher_service_url' );
         register_setting( 'attacher-settings-group', 'attacher_service_username' );
         register_setting( 'attacher-settings-group', 'attacher_service_password' );
@@ -222,5 +224,72 @@ class Attacher_Plugin {
      */
     public static function loadSettingsPage() {
         include( ATTACHER_PLUGIN_DIR . '/views/settings-page.php');
+    }
+    
+    public static function savePost( $post_id, $post ) {
+        if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) {
+            return;
+        }
+        if ( defined('DOING_AJAX') && DOING_AJAX ) {
+            return;
+        }
+        if ( ! current_user_can( 'edit_post', $post_id ) ) {
+            return;
+        }
+        if ( false !== wp_is_post_revision( $post_id ) ) {
+            return;
+        }
+        
+        if ( 'post' == $post->post_type ) {
+            $service = new Social_Semantic_Server_Rest(
+                    get_option( 'attacher_service_rest_url', '' ),
+                    get_option('attacher_service_username', '' ),
+                    get_option( 'attacher_service_password', '' )
+                    );
+            if ( !$service->isConnectionEstablished() ) {
+                error_log( 'NO SERVICE CONNECTION' );
+                return;
+            }
+            
+            $entity_uri = wp_get_shortlink( $post->ID );
+            
+            // XXX A resource might be removed from the server
+            // TODO Need a real check to see if entity already exists
+            if ( 1 != get_post_meta( $post->ID, 'attacher_added_to_service', true ) ) {
+                $root_collection = $service->collUserRootGet();
+                // TODO It seems that running it multiple times is also quite ok,
+                // new object does not get created
+                $entry_added = $service->collUserEntryAdd( $root_collection->uri, $entity_uri, $post->post_title, $root_collection->space );
+                if ( ! is_wp_error( $entry_added ) ) {
+                    update_post_meta( $post->ID, 'attacher_added_to_service', 1 );
+                }
+            }
+            
+            $entity = $service->entityDescGet( $entity_uri, true, true, true );
+            
+            if ( $post->title !== $entity->label) {
+                $service->entityLabelSet( $entity_uri, $post->post_title );
+            }
+            
+            $existing_tags = array();      
+            if ( $entity->tags && sizeof( $entity->tags ) > 0 ) {
+                foreach( $entity->tags as $tag ) {
+                    $existing_tags[] = $tag->label;
+                } 
+            }
+            
+            $tags = wp_get_post_tags( $post->ID, array( 'fields' => 'names' ) );
+            
+            $combined_tags = array_unique( array_merge( $existing_tags, $tags ) );
+            if ( $combined_tags && sizeof( $combined_tags ) > 0 ) {
+                foreach ( $combined_tags as $tag ) {
+                    if ( ! in_array( $tag, $existing_tags ) ) {
+                        $service->tagAdd( $entity_uri, $tag );
+                    } else if ( ! in_array( $tag, $tags ) ) {
+                        $service->tagsUserRemove( $entity_uri, $tag );
+                    }
+                }
+            }
+        }
     }
 }

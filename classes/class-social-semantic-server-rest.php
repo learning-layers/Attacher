@@ -33,6 +33,7 @@ class Social_Semantic_Server_Rest {
     private $password;
     private $user;
     private $key;
+    private $connection_established = false;
     
     /**
      * 
@@ -47,8 +48,24 @@ class Social_Semantic_Server_Rest {
         
         // TODO It might be a good idea to raise an error if either auth or
         // login fails
-        $this->authCheckCred();
-        $this->userLogin();
+        if ( $this->authCheckCred() ) {
+            if ( $this->userLogin() ) {
+                $this->connection_established = true;
+            }
+        }
+    }
+    
+    public function isConnectionEstablished() {
+        return $this->connection_established;
+    }
+    
+    private function checkRequestBodyForErrorsAndReturn( $body ) {
+        $body = json_decode( $body );
+        if ( ! $body.error ) {
+            return $body;
+        } else {
+            return WP_Error( 'error', 'Got method call error' );
+        }
     }
     
     private function makeRequest( $method, $body ) {
@@ -63,10 +80,9 @@ class Social_Semantic_Server_Rest {
             return $result;
         } else {
             if ( 200 == $result['response']['code'] ) {
-                // TODO Need to check the response if it has errors or not
-                return json_decode( $result['body'] );
+                return $this->checkRequestBodyForErrorsAndReturn( $result['body'] );
             } else {
-                return WP_Error( $result['response']['code'], 'GOT ERROR' );
+                return WP_Error( $result['response']['code'], 'Got response code error' );
             }
         }
     }
@@ -90,7 +106,7 @@ class Social_Semantic_Server_Rest {
     
     public function userLogin() {
         $body = array(
-            'key' => 'kala',
+            'key' => $this->key,
             'op' => 'userLogin',
             'user' => 'mailto:dummyUser',
             'userLabel' => $this->username,
@@ -102,5 +118,112 @@ class Social_Semantic_Server_Rest {
             return TRUE;
         }
         return FALSE;
+    }
+    
+    public function collUserEntryAdd( $coll, $collEntry, $collEntryLabel, $space ) {
+        $body = array(
+            'key' => $this->key,
+            'user' => $this->user,
+            'addNewColl' => false,
+            'coll' => $coll,
+            'collEntry' => $collEntry,
+            'collEntryLabel' => $collEntryLabel,
+            'op' => 'collUserEntryAdd',
+            'space' => $space,
+        );
+        
+        return $this->makeRequest( 'collUserEntryAdd', $body );
+    }
+    
+    public function entityLabelSet( $entityUri, $label ) {
+        $body = array(
+            'key' => $this->key,
+            'user' => $this->user,
+            'op' => 'entityLabelSet',
+            'entityUri' => $entityUri,
+            'label' => $label,
+        );
+        
+        return $this->makeRequest( 'entityLabelSet', $body );
+    }
+    
+    public function tagAdd( $resource, $tagString ) {
+        $body = array(
+            'key' => $this->key,
+            'user' => $this->user,
+            'resource' => $resource,
+            'tagString' => $tagString,
+            'op' => 'tagAdd',
+            'space' => 'privateSpace',
+        );
+        
+        return $this->makeRequest( 'tagAdd', $body );
+    }
+    
+    public function tagsUserRemove( $resource, $tagString ) {
+        $body = array(
+            'key' => $this->key,
+            'user' => $this->user,
+            'resource' => $resource,
+            'tagString' => $tagString,
+            'op' => 'tagsUserRemove',
+            'space' => 'privateSpace',
+        );
+        
+        return $this->makeRequest( 'tagsUserRemove', $body );
+    }
+    
+    public function collUserRootGet() {
+        $body = array(
+            'key' => $this->key,
+            'user' => $this->user,
+            'op' => 'collUserRootGet',
+        );
+        
+        $result = $this->makeRequest( 'collUserRootGet', $body );
+        
+        if ( ! is_wp_error( $result ) ) {
+            return $result->{$result->op}->coll;
+        }
+        
+        return $result;
+    }
+    
+    public function entityDescGet( $entityUri, $getDiscUris = true, $getOverallRating = true, $getTags = true) {
+        $body = array(
+            'key' => $this->key,
+            'user' => $this->user,
+            'op' => 'entityDescGet',
+            'entityUri' => $entityUri,
+            'getDiscUris' => $getDiscUris,
+            'getOverallRating' => $getOverallRating,
+            'getTags' => $getTags,
+        );
+        
+        $result = $this->makeRequest( 'entityDescGet', $body );
+        
+        if ( ! is_wp_error( $result ) ) {
+            return $result->{$result->op}->entityDesc;
+        }
+        
+        return $result;
+    }
+    
+    public function ratingUserSet( $resource, $value ) {
+        $body = array(
+            'key' => $this->key,
+            'user' => $this->user,
+            'op' => 'ratingUserSet',
+            'resource' => $resource,
+            'value' => $value,
+        );
+        
+        $result = $this->makeRequest( 'ratingUserSet', $body );
+        
+        if ( ! is_wp_error( $result ) ) {
+            return true;
+        }
+        
+        return $result;
     }
 }

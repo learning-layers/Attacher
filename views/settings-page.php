@@ -34,9 +34,22 @@ if ( !current_user_can( 'manage_options' ) ) {
         <table class="form-table">
             <tbody>
                 <tr valign="top">
+                    <th scope="row"><?php _e( 'SocialSemanticServerREST URL', Attacher_Plugin::getTextDomain() ); ?></th>
+                    <td>
+                        <input type="text" id="attacher_service_rest_url" name="attacher_service_rest_url" value="<?php echo get_option( 'attacher_service_rest_url', '' ); ?>" class="regular-text" />
+                        <p class="description">
+                            <?php _e( 'Add REST service URL followed by a slash. Example: http://example.com/ss-adapter-rest/', Attacher_Plugin::getTextDomain() ); ?>
+                        </p>
+                    </td>
+                </tr>
+                
+                <tr valign="top">
                     <th scope="row"><?php _e( 'SocialSemanticServerClientSide URL', Attacher_Plugin::getTextDomain() ); ?></th>
                     <td>
                         <input type="text" id="attacher_service_url" name="attacher_service_url" value="<?php echo get_option( 'attacher_service_url', '' ); ?>" class="regular-text" />
+                        <p class="description">
+                            <?php _e( 'Add ClientSide API URL followed by a slash. Example: http://example.com/SocialSemanticServerClientSide/', Attacher_Plugin::getTextDomain() ); ?>
+                        </p>
                     </td>
                 </tr>
                 
