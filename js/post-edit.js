@@ -66,7 +66,6 @@
     function attacher_initialize_downloadable_files(holder) {
         holder.find('a.attacher-downloadable-file').on('click', function(e) {
             e.preventDefault();
-            // TODO Probably need to get entity info first, the download the file
             attacher_service_download_file(attacher_service_error, $(this).attr('href'), $(this).data('label'));
         });
     }

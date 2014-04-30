@@ -36,6 +36,8 @@ define( 'ATTACHER_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'ATTACHER_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 
 require_once( ATTACHER_PLUGIN_DIR . 'classes/class-attacher-plugin.php' );
+require_once( ATTACHER_PLUGIN_DIR . 'classes/class-social-semantic-server-rest.php' );
+
 
 register_activation_hook( __FILE__ , array( 'Attacher_Plugin', 'plugin_activation' ) );
 register_deactivation_hook( __FILE__, array( 'Attacher_Plugin', 'plugin_deactivation' ) );
