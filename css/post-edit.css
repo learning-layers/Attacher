@@ -59,3 +59,7 @@
 #attacher-resources .attacher-collection-resources-container label:before {
     content: '\f163';
 }
+
+#attacher-resources .attacher-collection-resources-container a.attacher-resource-private {
+    color: orange;
+}

@@ -94,6 +94,11 @@
                             if ('file' == entry.type) {
                                 resource_class += ' attacher-downloadable-file';
                             }
+                            if (sSGlobals.spacePrivate === entry.space) {
+                                resource_class += ' attacher-resource-private';
+                            } else if (sSGlobals.spaceShared === entry.space) {
+                                resource_class += ' attacher-resource-shared';
+                            }
                             collection_resources.append('<li><a href="' + entry.uri + '" target="_blank" class="' + resource_class + '" data-label="' + entry.label + '">' + entry.label + '</a></li>');
                         }
                     });
