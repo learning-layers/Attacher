@@ -191,6 +191,7 @@ class Attacher_Plugin {
             'sstagconns'                => 'SSSClientInterfaceREST/connectors/SSTagConns.js',
             'ssfileconns'               => 'SSSClientInterfaceREST/connectors/SSFileConns.js',
             'ssfiledownload'            => 'SSSClientInterfaceREST/connectors/SSFileDownload.js',
+            'sssearchconns'             => 'SSSClientInterfaceREST/connectors/SSSearchConns.js',
         );
         
         foreach ( $scripts as $s_key => $s_val ) {

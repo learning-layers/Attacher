@@ -87,11 +87,11 @@
             function deal_with_resources(result) {
                 var collection_resources = $('#attacher-resources').find('.attacher-collection-resources');
 
-                if (result.coll.entries) {
-                    $.each(result.coll.entries, function(key, entry) {
-                        if ('coll' !== entry.entityType) {
+                if (result.searchResults) {
+                    $.each(result.searchResults, function(key, entry) {
+                        if ('coll' !== entry.type) {
                             var resource_class = 'attacher-resource';
-                            if ('file' == entry.entityType) {
+                            if ('file' == entry.type) {
                                 resource_class += ' attacher-downloadable-file';
                             }
                             collection_resources.append('<li><a href="' + entry.uri + '" target="_blank" class="' + resource_class + '" data-label="' + entry.label + '">' + entry.label + '</a></li>');
@@ -133,8 +133,9 @@
                     collection_resources.empty();
                     collection_tagcloud.find('a').removeClass('selected');
                     $(e.target).addClass('selected');
-
-                    attacher_service_get_collection_with_entries(deal_with_resources, attacher_service_error, collections_select.val());
+                    
+                    attacher_service_search_tags_within_entity(deal_with_resources, attacher_service_error, collections_select.val(), [$(this).data('tag')]);
+                    //attacher_service_get_collection_with_entries(deal_with_resources, attacher_service_error, collections_select.val());
                 });
             }
         }

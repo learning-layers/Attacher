@@ -103,6 +103,29 @@ function attacher_service_get_collection_with_entries(callback, error_callback, 
 }
 
 /**
+ * A service callback to get all resources with certain tag within a collection
+ * @param {function}    callback        Success callback
+ * @param {function}    error_callback  Error callback
+ * @param {string}      entity_uri      Entity (collection) uri
+ * @param {array}       tag_labels      Array of tag labels
+ */
+function attacher_service_search_tags_within_entity(callback, error_callback, entity_uri, tag_labels) {
+    new SSSearchWithTagsWithinEntity().handle(
+            function(result) {
+                console.log(result);
+                callback(result);
+            },
+            function(result) {
+                error_callback();
+            },
+            AttacherData.user,
+            AttacherData.key,
+            entity_uri,
+            tag_labels
+            );
+}
+
+/**
  * Obtains service token for an account. Makes a second call on success that
  * will bring the user URI. Both are added to AttacherData object to be used
  * later on.

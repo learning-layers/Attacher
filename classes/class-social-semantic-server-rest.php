@@ -59,11 +59,16 @@ class Social_Semantic_Server_Rest {
         return $this->connection_established;
     }
     
+    private function logError( $data ) {
+        error_log( print_r( $data, true ) );
+    }
+    
     private function checkRequestBodyForErrorsAndReturn( $body ) {
         $body = json_decode( $body );
         if ( ! $body.error ) {
             return $body;
         } else {
+            $this->logError( $body );
             return WP_Error( 'error', 'Got method call error' );
         }
     }
@@ -77,11 +82,13 @@ class Social_Semantic_Server_Rest {
         $result = wp_remote_post( $request_url, $args );
         
         if ( is_wp_error( $result ) ) {
+            $this->logError( $result );
             return $result;
         } else {
             if ( 200 == $result['response']['code'] ) {
                 return $this->checkRequestBodyForErrorsAndReturn( $result['body'] );
             } else {
+                $this->logError( $result ); 
                 return WP_Error( $result['response']['code'], 'Got response code error' );
             }
         }
