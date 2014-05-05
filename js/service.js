@@ -112,7 +112,6 @@ function attacher_service_get_collection_with_entries(callback, error_callback, 
 function attacher_service_search_tags_within_entity(callback, error_callback, entity_uri, tag_labels) {
     new SSSearchWithTagsWithinEntity().handle(
             function(result) {
-                console.log(result);
                 callback(result);
             },
             function(result) {

@@ -252,19 +252,23 @@ class Attacher_Plugin {
                 return;
             }
             
+            /*
+             * New logic
+             * 1. Check if root collection has a shared collection with label
+             * "Attacher resources".
+             * 2. If not - create one. Make sure it is within a "sharedSpace"
+             * 3. Use this collection to store the link to a post
+             * 4. Always try to create a link, this seems to be OK with the
+             * service and is not created twice if already exists.
+             */
+            
             $entity_uri = wp_get_shortlink( $post->ID );
             
-            // XXX A resource might be removed from the server
-            // TODO Need a real check to see if entity already exists
-            if ( 1 != get_post_meta( $post->ID, 'attacher_added_to_service', true ) ) {
-                $root_collection = $service->collUserRootGet();
-                // TODO It seems that running it multiple times is also quite ok,
-                // new object does not get created
-                $entry_added = $service->collUserEntryAdd( $root_collection->uri, $entity_uri, $post->post_title, $root_collection->space );
-                if ( ! is_wp_error( $entry_added ) ) {
-                    update_post_meta( $post->ID, 'attacher_added_to_service', 1 );
-                }
-            }
+            // It might be better to check if the resource exist and not try to
+            // create it anyway
+            // XXX Need to use the shared collection named "Attacher resources"
+            $root_collection = $service->collUserRootGet();
+            $entry_added = $service->collUserEntryAdd( $root_collection->uri, $entity_uri, $post->post_title, $root_collection->space );
             
             $entity = $service->entityDescGet( $entity_uri, true, true, true );
             
@@ -272,10 +276,11 @@ class Attacher_Plugin {
                 $service->entityLabelSet( $entity_uri, $post->post_title );
             }
             
-            $existing_tags = array();      
+            $existing_tags = array();
             if ( $entity->tags && sizeof( $entity->tags ) > 0 ) {
                 foreach( $entity->tags as $tag ) {
-                    $existing_tags[] = $tag->label;
+                    
+                    $existing_tags[] = $tag;
                 } 
             }
             
@@ -285,6 +290,7 @@ class Attacher_Plugin {
             if ( $combined_tags && sizeof( $combined_tags ) > 0 ) {
                 foreach ( $combined_tags as $tag ) {
                     if ( ! in_array( $tag, $existing_tags ) ) {
+                        error_log( "adding a tag" );
                         $service->tagAdd( $entity_uri, $tag );
                     } else if ( ! in_array( $tag, $tags ) ) {
                         $service->tagsUserRemove( $entity_uri, $tag );
