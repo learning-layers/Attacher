@@ -252,24 +252,36 @@ class Attacher_Plugin {
                 return;
             }
             
-            /*
-             * New logic
-             * 1. Check if root collection has a shared collection with label
-             * "Attacher resources".
-             * 2. If not - create one. Make sure it is within a "sharedSpace"
-             * 3. Use this collection to store the link to a post
-             * 4. Always try to create a link, this seems to be OK with the
-             * service and is not created twice if already exists.
-             */
-            
             $entity_uri = wp_get_shortlink( $post->ID );
             
-            // It might be better to check if the resource exist and not try to
-            // create it anyway
-            // XXX Need to use the shared collection named "Attacher resources"
             $root_collection = $service->collUserRootGet();
-            $entry_added = $service->collUserEntryAdd( $root_collection->uri, $entity_uri, $post->post_title, $root_collection->space );
+            $attacher_shared_resources_uri = NULL;
+            $attacher_shared_resources_title = 'Attacher Shared Resources';
             
+            // Check if "Attacher Shared Resources" already exists within a root
+            // collection.
+            if ( $root_collection->entries && is_array( $root_collection->entries ) && sizeof( $root_collection->entries > 0 ) ) {
+                foreach ( $root_collection->entries as $entry ) {
+                    if ( 'coll' == $entry->entityType ) {
+                        if ( $attacher_shared_resources_title == $entry->label ) {
+                            $attacher_shared_resources_uri = $entry->uri;
+                        }
+                    }
+                }
+            }
+            
+            // Create "Attacher Shard Resources" collections if not exists, also
+            // set it to be shared (public).
+            if ( ! $attacher_shared_resources_uri ) {
+                $attacher_shared_resources = $service->collUserEntryAdd( $root_collection->uri, null, $attacher_shared_resources_title, true );
+                $attacher_shared_resources_uri = $attacher_shared_resources->collUserEntryAdd->uri;
+                $service->entityUserPublicSet( $attacher_shared_resources_uri ); 
+            }
+            
+            $entry_added = $service->collUserEntryAdd( $attacher_shared_resources_uri, $entity_uri, $post->post_title, false );
+            error_log( print_r( $entry_added, true ) );
+            
+            // TODO it might be a good idea to check if a resource already exists
             $entity = $service->entityDescGet( $entity_uri, true, true, true );
             
             if ( $post->title !== $entity->label) {

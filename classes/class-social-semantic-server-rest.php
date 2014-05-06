@@ -127,18 +127,22 @@ class Social_Semantic_Server_Rest {
         return FALSE;
     }
     
-    public function collUserEntryAdd( $coll, $collEntry, $collEntryLabel, $space ) {
+    public function collUserEntryAdd( $coll, $collEntry, $collEntryLabel, $addNewColl ) {
         $body = array(
             'key' => $this->key,
             'user' => $this->user,
-            'addNewColl' => false,
             'coll' => $coll,
-            'collEntry' => $collEntry,
             'collEntryLabel' => $collEntryLabel,
             'op' => 'collUserEntryAdd',
-            'space' => $space,
         );
         
+        if ( $collEntry ) {
+            $body['collEntry'] = $collEntry;
+        }
+        if ( $addNewColl ) {
+            $body['addNewColl'] = $addNewColl;
+        }
+
         return $this->makeRequest( 'collUserEntryAdd', $body );
     }
     
@@ -233,4 +237,15 @@ class Social_Semantic_Server_Rest {
         
         return $result;
     }
+    
+    public function entityUserPublicSet( $entityUri ) {
+        $body = array(
+            'key' => $this->key,
+            'user' => $this->user,
+            'op' => 'entityUserPublicSet',
+            'entityUri' => $entityUri,
+        );
+        
+        return $this->makeRequest( 'entityUserPublicSet', $body );
+    }    
 }
