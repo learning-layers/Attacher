@@ -303,9 +303,9 @@ class Attacher_Plugin {
                 foreach ( $combined_tags as $tag ) {
                     if ( ! in_array( $tag, $existing_tags ) ) {
                         error_log( "adding a tag" );
-                        $service->tagAdd( $entity_uri, $tag );
+                        $service->tagAdd( $entity_uri, $tag, 'sharedSpace');
                     } else if ( ! in_array( $tag, $tags ) ) {
-                        $service->tagsUserRemove( $entity_uri, $tag );
+                        $service->tagsUserRemove( $entity_uri, $tag, 'sharedSpace');
                     }
                 }
             }

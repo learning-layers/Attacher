@@ -158,27 +158,27 @@ class Social_Semantic_Server_Rest {
         return $this->makeRequest( 'entityLabelSet', $body );
     }
     
-    public function tagAdd( $resource, $tagString ) {
+    public function tagAdd( $resource, $tagString, $space ) {
         $body = array(
             'key' => $this->key,
             'user' => $this->user,
             'resource' => $resource,
             'tagString' => $tagString,
             'op' => 'tagAdd',
-            'space' => 'privateSpace',
+            'space' => $space,
         );
         
         return $this->makeRequest( 'tagAdd', $body );
     }
     
-    public function tagsUserRemove( $resource, $tagString ) {
+    public function tagsUserRemove( $resource, $tagString, $space ) {
         $body = array(
             'key' => $this->key,
             'user' => $this->user,
             'resource' => $resource,
             'tagString' => $tagString,
             'op' => 'tagsUserRemove',
-            'space' => 'privateSpace',
+            'space' => $space,
         );
         
         return $this->makeRequest( 'tagsUserRemove', $body );
