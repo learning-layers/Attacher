@@ -34,15 +34,55 @@
             attacher_service_download_file(attacher_service_error, $(this).attr('href'), $(this).data('label'));
         });
     }
-    
+
+    function attacher_add_update_raiting(holder, post_uri) {
+        attacher_service_raiting_overall_get(function(result) {
+            holder.find('.attacher-raiting').remove();
+            var raiting_html = '<div class="attacher-raiting">';
+            for (var i = 1; i <= 5; i++) {
+                if (result.ratingOverall.score >= i) {
+                    raiting_html += '<a href="#" data-score="' + i + '"><div class="dashicons dashicons-star-filled"></div></a>';
+                } else {
+                    raiting_html += '<a href="#" data-score="' + i + '"><div class="dashicons dashicons-star-empty"></div></a>';
+                }
+            }
+            raiting_html += '<div class="attacher-raiting-frequency">(' + result.ratingOverall.frequency + ')</div>';
+            raiting_html += '</div>';
+            holder.append(raiting_html);
+
+            holder.find('.attacher-raiting a').on('click', function(e) {
+                e.preventDefault();
+                var score = $(this).data('score');
+                new SSRatingUserSet().handle(
+                        function(result) {
+                            attacher_add_update_raiting(holder, post_uri);
+                        },
+                        function(result) {
+                            attacher_service_error();
+                        },
+                        AttacherData.user + '_' + AttacherData.user_ip,
+                        AttacherData.key,
+                        post_uri,
+                        score
+                        );
+            });
+        }, attacher_service_error, post_uri);
+    }
+
     /**
      * Initialize post view additional logic
      * @returns {undefined}
      */
     function attacher_initialize_post_view() {
-        attacher_initialize_downloadable_files($('.entry-content'));
+        attacher_initialize_downloadable_files($('article.type-post .entry-content'));
+        $('article.type-post').each(function() {
+            var tmp_post_id = $(this).attr('id');
+            tmp_post_id = tmp_post_id.split('-');
+            tmp_post_id = tmp_post_id[1];
+            attacher_add_update_raiting($(this).find('header.entry-header'), AttacherData.home_url + '/?p=' + tmp_post_id);
+        });
     }
-    
+
     $(document).ready(function() {
         attacher_service_authenticate(attacher_initialize_post_view, attacher_service_error);
     });

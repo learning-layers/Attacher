@@ -89,9 +89,9 @@ function attacher_service_get_user_could_subscribe_collections(callback, error_c
  * @param {string}  user                Optional collection owner uri
  */
 function attacher_service_get_collection_tags(callback, error_callback, collection_uri, user) {
-    if ( ! user ) {
+    if (!user) {
         user = AttacherData.user;
-        
+
     }
     new SSCollUserCumulatedTagsGet().handle(
             function(result) {
@@ -215,6 +215,27 @@ function attacher_service_download_file(error_callback, uri, label) {
                         AttacherData.key,
                         uri
                         );
+            },
+            function(result) {
+                error_callback();
+            },
+            AttacherData.user,
+            AttacherData.key,
+            uri
+            );
+}
+
+/**
+ * 
+ * @param {type} callback
+ * @param {type} error_callback
+ * @param {type} uri
+ * @returns {undefined}
+ */
+function attacher_service_raiting_overall_get(callback, error_callback, uri) {
+    new SSRatingOverallGet().handle(
+            function(result) {
+                callback(result);
             },
             function(result) {
                 error_callback();
