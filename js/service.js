@@ -63,10 +63,9 @@ function attacher_service_get_user_collections(callback, error_callback) {
 }
 
 /**
- * TODO Need to write a docstring
- * @param {type} callback
- * @param {type} error_callback
- * @returns {undefined}
+ * A service call that brings all shared collections from others
+ * @param {function} callback Success callback, is given result object
+ * @param {function} error_callback Error callback
  */
 function attacher_service_get_user_could_subscribe_collections(callback, error_callback) {
     new SSCollsUserCouldSubscribeGet().handle(
@@ -83,10 +82,10 @@ function attacher_service_get_user_could_subscribe_collections(callback, error_c
 
 /**
  * A service call to get cumulated collection tags
- * @param {function} callback         Success callback, is given result object
- * @param {function} error_callback   Erro callback
- * @param {string} collection_uri     Collection URI
- * @param {string}  user                Optional collection owner uri
+ * @param {function}    callback        Success callback, is given result object
+ * @param {function}    error_callback  Erro callback
+ * @param {String}      collection_uri  Collection URI
+ * @param {String}      user            Optional collection owner uri
  */
 function attacher_service_get_collection_tags(callback, error_callback, collection_uri, user) {
     if (!user) {
@@ -226,11 +225,10 @@ function attacher_service_download_file(error_callback, uri, label) {
 }
 
 /**
- * 
- * @param {type} callback
- * @param {type} error_callback
- * @param {type} uri
- * @returns {undefined}
+ * A service call that brings the entity overall rating
+ * @param {function}    callback        Success callback
+ * @param {function}    error_callback  Error callback
+ * @param {String}      uri             Entity URI
  */
 function attacher_service_raiting_overall_get(callback, error_callback, uri) {
     new SSRatingOverallGet().handle(

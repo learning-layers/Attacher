@@ -34,7 +34,12 @@
             attacher_service_download_file(attacher_service_error, $(this).attr('href'), $(this).data('label'));
         });
     }
-
+    
+    /**
+     * Initializes or updates already present raiting for a single post
+     * @param {object} holder jQuery selector for the holder of raiting
+     * @param {string} post_uri Post shortlink
+     */
     function attacher_add_update_raiting(holder, post_uri) {
         attacher_service_raiting_overall_get(function(result) {
             holder.find('.attacher-raiting').remove();
@@ -68,6 +73,16 @@
             });
         }, attacher_service_error, post_uri);
     }
+    
+    /**
+     * Constructs post shortlink using id attribute
+     * @param {String} id_attr Post article element id attribute
+     * @returns {String} Post shortlink
+     */
+    function attacher_post_shortlink_from_id_attr(id_attr) {
+        id_attr = id_attr.split('-');
+        return AttacherData.home_url + '/?p=' + id_attr[1];
+    }
 
     /**
      * Initialize post view additional logic
@@ -76,10 +91,8 @@
     function attacher_initialize_post_view() {
         attacher_initialize_downloadable_files($('article.type-post .entry-content'));
         $('article.type-post').each(function() {
-            var tmp_post_id = $(this).attr('id');
-            tmp_post_id = tmp_post_id.split('-');
-            tmp_post_id = tmp_post_id[1];
-            attacher_add_update_raiting($(this).find('header.entry-header'), AttacherData.home_url + '/?p=' + tmp_post_id);
+            var post_shortlink = attacher_post_shortlink_from_id_attr($(this).attr('id'));
+            attacher_add_update_raiting($(this).find('header.entry-header'), post_shortlink);
         });
     }
 

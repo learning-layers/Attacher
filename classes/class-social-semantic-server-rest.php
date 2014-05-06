@@ -55,14 +55,29 @@ class Social_Semantic_Server_Rest {
         }
     }
     
+    /**
+     * Return the value to see if connection with the service could be
+     * established
+     * @return boolean
+     */
     public function isConnectionEstablished() {
         return $this->connection_established;
     }
     
+    /**
+     * Used to log error request data to error_log
+     * @param mixed $data
+     */
     private function logError( $data ) {
         error_log( print_r( $data, true ) );
     }
     
+    /**
+     * Checks body to see if service error occured. If an error flag is set,
+     * returns WP_Error object. Logs the  response body to error_log.
+     * @param string $body
+     * @return mixed Either response object or WP_Error
+     */
     private function checkRequestBodyForErrorsAndReturn( $body ) {
         $body = json_decode( $body );
         if ( ! $body.error ) {
@@ -73,6 +88,13 @@ class Social_Semantic_Server_Rest {
         }
     }
     
+    /**
+     * A wrapper for making requests to the service. Handles error cases and
+     * returns either response object or WP_Error.
+     * @param string    $method A method to be called
+     * @param array     $body   A body for the service call 
+     * @return mixed
+     */
     private function makeRequest( $method, $body ) {
         $request_url = "{$this->uri}rest/SSAdapterRest/{$method}/";
         
@@ -94,6 +116,11 @@ class Social_Semantic_Server_Rest {
         }
     }
     
+    /**
+     * Make a credentials check call. Will store the returned key for further
+     * service calls.
+     * @return boolean
+     */
     public function authCheckCred() {
         $body = array(
             'key' => 'someKey',
@@ -111,6 +138,11 @@ class Social_Semantic_Server_Rest {
         return FALSE;
     }
     
+    /**
+     * Make a user login call and store the returned user URI for use with
+     * further calls.
+     * @return boolean
+     */
     public function userLogin() {
         $body = array(
             'key' => $this->key,
@@ -127,6 +159,16 @@ class Social_Semantic_Server_Rest {
         return FALSE;
     }
     
+    /**
+     * Add an entry to a collection.
+     * @param string    $coll               Collection URI
+     * @param string    $collEntry          Collection entry URI (will not be
+     * sent to service if empty)
+     * @param string    $collEntryLabel     New entry label
+     * @param boolean   $addNewColl         Inficator if newly added entry is a
+     * collection (entry URI is not needed in that case)
+     * @return mixed
+     */
     public function collUserEntryAdd( $coll, $collEntry, $collEntryLabel, $addNewColl ) {
         $body = array(
             'key' => $this->key,
@@ -146,6 +188,12 @@ class Social_Semantic_Server_Rest {
         return $this->makeRequest( 'collUserEntryAdd', $body );
     }
     
+    /**
+     * Update existing entity label.
+     * @param string $entityUri Entity URI
+     * @param string $label     New label
+     * @return mixed
+     */
     public function entityLabelSet( $entityUri, $label ) {
         $body = array(
             'key' => $this->key,
@@ -158,6 +206,13 @@ class Social_Semantic_Server_Rest {
         return $this->makeRequest( 'entityLabelSet', $body );
     }
     
+    /**
+     * Add a tag to an entity.
+     * @param string $resource  Entity URI
+     * @param string $tagString Tag    
+     * @param string $space     Either sharedSpace or privateSpace
+     * @return mixed
+     */
     public function tagAdd( $resource, $tagString, $space ) {
         $body = array(
             'key' => $this->key,
@@ -171,6 +226,13 @@ class Social_Semantic_Server_Rest {
         return $this->makeRequest( 'tagAdd', $body );
     }
     
+    /**
+     * Remove a tag.
+     * @param string $resource  Entity URI
+     * @param string $tagString Tag
+     * @param string $space     Either sharedSpace or privateSpace
+     * @return mixed
+     */
     public function tagsUserRemove( $resource, $tagString, $space ) {
         $body = array(
             'key' => $this->key,
@@ -184,6 +246,10 @@ class Social_Semantic_Server_Rest {
         return $this->makeRequest( 'tagsUserRemove', $body );
     }
     
+    /**
+     * Get user root collection.
+     * @return mixed
+     */
     public function collUserRootGet() {
         $body = array(
             'key' => $this->key,
@@ -200,6 +266,14 @@ class Social_Semantic_Server_Rest {
         return $result;
     }
     
+    /**
+     * Get and additional information for an entity.
+     * @param string    $entityUri          Entity URI
+     * @param boolean   $getDiscUris        Flag to include didcussions
+     * @param boolean   $getOverallRating   Flag to include raiting information
+     * @param boolean   $getTags            Flag to include tags
+     * @return mixed
+     */
     public function entityDescGet( $entityUri, $getDiscUris = true, $getOverallRating = true, $getTags = true) {
         $body = array(
             'key' => $this->key,
@@ -220,6 +294,12 @@ class Social_Semantic_Server_Rest {
         return $result;
     }
     
+    /**
+     * Set raiting for an entity.
+     * @param string    $resource   Entity URI
+     * @param int       $value      Value from 1 to 5
+     * @return mixed
+     */
     public function ratingUserSet( $resource, $value ) {
         $body = array(
             'key' => $this->key,
@@ -238,6 +318,11 @@ class Social_Semantic_Server_Rest {
         return $result;
     }
     
+    /**
+     * Make entity public (mostly applicable to a collection).
+     * @param string $entityUri Entity URI
+     * @return mixed
+     */
     public function entityUserPublicSet( $entityUri ) {
         $body = array(
             'key' => $this->key,

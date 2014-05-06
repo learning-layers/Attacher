@@ -233,6 +233,12 @@ class Attacher_Plugin {
         include( ATTACHER_PLUGIN_DIR . '/views/settings-page.php');
     }
     
+    /**
+     * Used with post_update action to make necessary service calls
+     * @param int       $post_id    Post identifier
+     * @param WP_Post   $post       Post object
+     * @return null
+     */
     public static function savePost( $post_id, $post ) {
         if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) {
             return;
