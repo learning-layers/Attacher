@@ -63,13 +63,13 @@ function attacher_service_get_user_collections(callback, error_callback) {
 }
 
 /**
- * A service call to get cumulated collection tags
- * @param {function} callback         Success callback, is given result object
- * @param {function} error_callback   Erro callback
- * @param {string} collection_uri     Collection URI
+ * TODO Need to write a docstring
+ * @param {type} callback
+ * @param {type} error_callback
+ * @returns {undefined}
  */
-function attacher_service_get_collection_tags(callback, error_callback, collection_uri) {
-    new SSCollUserCumulatedTagsGet().handle(
+function attacher_service_get_user_could_subscribe_collections(callback, error_callback) {
+    new SSCollsUserCouldSubscribeGet().handle(
             function(result) {
                 callback(result);
             },
@@ -77,6 +77,30 @@ function attacher_service_get_collection_tags(callback, error_callback, collecti
                 error_callback();
             },
             AttacherData.user,
+            AttacherData.key
+            );
+}
+
+/**
+ * A service call to get cumulated collection tags
+ * @param {function} callback         Success callback, is given result object
+ * @param {function} error_callback   Erro callback
+ * @param {string} collection_uri     Collection URI
+ * @param {string}  user                Optional collection owner uri
+ */
+function attacher_service_get_collection_tags(callback, error_callback, collection_uri, user) {
+    if ( ! user ) {
+        user = AttacherData.user;
+        
+    }
+    new SSCollUserCumulatedTagsGet().handle(
+            function(result) {
+                callback(result);
+            },
+            function(result) {
+                error_callback();
+            },
+            user,
             AttacherData.key,
             collection_uri
             );
@@ -109,7 +133,10 @@ function attacher_service_get_collection_with_entries(callback, error_callback, 
  * @param {string}      entity_uri      Entity (collection) uri
  * @param {array}       tag_labels      Array of tag labels
  */
-function attacher_service_search_tags_within_entity(callback, error_callback, entity_uri, tag_labels) {
+function attacher_service_search_tags_within_entity(callback, error_callback, entity_uri, tag_labels, user) {
+    if (!user) {
+        user = AttacherData.user;
+    }
     new SSSearchWithTagsWithinEntity().handle(
             function(result) {
                 callback(result);
@@ -117,7 +144,7 @@ function attacher_service_search_tags_within_entity(callback, error_callback, en
             function(result) {
                 error_callback();
             },
-            AttacherData.user,
+            user,
             AttacherData.key,
             entity_uri,
             tag_labels

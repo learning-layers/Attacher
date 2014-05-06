@@ -139,8 +139,7 @@
                     collection_tagcloud.find('a').removeClass('selected');
                     $(e.target).addClass('selected');
                     
-                    attacher_service_search_tags_within_entity(deal_with_resources, attacher_service_error, collections_select.val(), [$(this).data('tag')]);
-                    //attacher_service_get_collection_with_entries(deal_with_resources, attacher_service_error, collections_select.val());
+                    attacher_service_search_tags_within_entity(deal_with_resources, attacher_service_error, collections_select.val(), [$(this).data('tag')], collections_select.find(':selected').data('author'));
                 });
             }
         }
@@ -151,18 +150,28 @@
 
         if (result.colls) {
             $.each(result.colls, function(key, coll) {
-                collections_select.append('<option value="' + coll.uri + '">' + coll.label + '</option>');
+                collections_select.append('<option value="' + coll.uri + '" data-author="' + coll.author + '">' + coll.label + '</option>');
             });
         }
+        
+        // Load shared collections available to the user
+        attacher_service_get_user_could_subscribe_collections(function(result) {
+            if (result.colls) {
+                $.each(result.colls, function(key, coll) {
+                    collections_select.append('<option value="' + coll.uri + '" data-author="' + coll.author + '">' + coll.label + '</option>');
+                });
+            }
+        }, attacher_service_error);
 
         collections_select.on('change', function() {
             var collection_uri = $(this).val();
+            var collection_autor = $(this).find(':selected').data('author');
 
             collection_tagcloud.empty();
             collection_resources.empty();
 
             if (collection_uri) {
-                attacher_service_get_collection_tags(deal_with_tags, attacher_service_error, collection_uri);
+                attacher_service_get_collection_tags(deal_with_tags, attacher_service_error, collection_uri, collection_autor);
             }
         });
 
