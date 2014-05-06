@@ -279,7 +279,6 @@ class Attacher_Plugin {
             }
             
             $entry_added = $service->collUserEntryAdd( $attacher_shared_resources_uri, $entity_uri, $post->post_title, false );
-            error_log( print_r( $entry_added, true ) );
             
             // TODO it might be a good idea to check if a resource already exists
             $entity = $service->entityDescGet( $entity_uri, true, true, true );
@@ -302,7 +301,6 @@ class Attacher_Plugin {
             if ( $combined_tags && sizeof( $combined_tags ) > 0 ) {
                 foreach ( $combined_tags as $tag ) {
                     if ( ! in_array( $tag, $existing_tags ) ) {
-                        error_log( "adding a tag" );
                         $service->tagAdd( $entity_uri, $tag, 'sharedSpace');
                     } else if ( ! in_array( $tag, $tags ) ) {
                         $service->tagsUserRemove( $entity_uri, $tag, 'sharedSpace');
