@@ -27,6 +27,8 @@
  * @author pjotr
  */
 class Social_Semantic_Server_Rest {
+    const SPACE_SHARED = 'sharedSpace';
+    const SPACE_PRIVATE = 'privateSpace';
     
     private $uri;
     private $username;
