@@ -66,6 +66,8 @@ class Attacher_Plugin {
             add_action( 'admin_enqueue_scripts', array( 'Attacher_Plugin', 'adminEnqueueScripts' ) );
             add_action( 'admin_menu', array( 'Attacher_Plugin', 'addMenuPages' ) );
             add_action( 'post_updated', array( 'Attacher_Plugin', 'savePost' ), 10, 2 );
+            add_action( 'admin_notices', array( 'Attacher_Plugin', 'adminNotices' ) );
+
         }
     }
     
@@ -81,13 +83,15 @@ class Attacher_Plugin {
      * Hooked to add_meta_boxes action
      */
     public static function addMetaBoxes() {
-        add_meta_box( 'attacher-resources',
-                __( 'Attacher', self::getTextDomain() ),
-                array( 'Attacher_Plugin', 'addResourcesMetaBox'),
-                'post',
-                'side',
-                'high'
-        );
+        if ( self::getServiceUrl() && self::getServiceUsername() && self::getServicePassword() ) {
+            add_meta_box( 'attacher-resources',
+                    __( 'Attacher', self::getTextDomain() ),
+                    array( 'Attacher_Plugin', 'addResourcesMetaBox'),
+                    'post',
+                    'side',
+                    'high'
+            );
+        }
     }
     
     /**
@@ -133,20 +137,21 @@ class Attacher_Plugin {
     public static function enqueueScripts() {
         global $post;
 
-        if ( $post ) {
+        if ( $post && ( self::getServiceUrl() && self::getServiceUsername() && self::getServicePassword() ) ) {
             wp_register_script('attacher-service', ATTACHER_PLUGIN_URL . 'js/service.js');
             wp_localize_script('attacher-service', 'AttacherData', array(
-                'service_username' => get_option( 'attacher_service_username', '' ),
-                'service_password' => get_option( 'attacher_service_password', '' ),
+                'service_username' => self::getServiceUsername(),
+                'service_password' => self::getServicePassword(),
                 'user_ip' => preg_replace( '/[^0-9a-fA-F:., ]/', '',$_SERVER['REMOTE_ADDR'] ),
                 'home_url' => home_url(),
+                'is_user_logged_in' => is_user_logged_in() ? 1 : 0,
             ));
             wp_enqueue_script( 'attacher-service' );
             self::enqueueSemanticServerClientSideScripts();
             wp_register_script( 'attacher-post-view', ATTACHER_PLUGIN_URL . 'js/post-view.js', array( 'jquery' ) );
             wp_enqueue_script( 'attacher-post-view' );
             
-            wp_register_style( 'attacher-post-view', ATTACHER_PLUGIN_URL . 'css/post-view.css' );
+            wp_register_style( 'attacher-post-view', ATTACHER_PLUGIN_URL . 'css/post-view.css', array( 'dashicons' ) );
             wp_enqueue_style( 'attacher-post-view' );
         }
     }
@@ -158,12 +163,12 @@ class Attacher_Plugin {
     public static function adminEnqueueScripts( $hook ) {
         global $post;
         
-        if ( $hook == 'post-new.php' || $hook == 'post.php' ) {
+        if ( $hook == 'post-new.php' || $hook == 'post.php' && ( self::getServiceUrl() && self::getServiceUsername() && self::getServicePassword() ) ) {
             if ( $post && 'post' == $post->post_type ) {
                 wp_register_script( 'attacher-service', ATTACHER_PLUGIN_URL . 'js/service.js');
                 wp_localize_script( 'attacher-service', 'AttacherData', array(
-                    'service_username' => get_option( 'attacher_service_username', '' ),
-                    'service_password' => get_option( 'attacher_service_password', '' ),
+                    'service_username' => self::getServiceUsername(),
+                    'service_password' => self::getServicePassword(),
                 ));
                 wp_enqueue_script( 'attacher-service' );
                 self::enqueueSemanticServerClientSideScripts();
@@ -183,7 +188,7 @@ class Attacher_Plugin {
      * Enqueue SocialSemanticServerClientSide scripts
      */
     public static function enqueueSemanticServerClientSideScripts() {
-        $sss_client_side_url = get_option( 'attacher_service_url', '');
+        $sss_client_side_url = self::getServiceUrl();
         
         $scripts = array(
             'jsglobals'                 => 'JSUtilities/JSGlobals.js',
@@ -226,7 +231,7 @@ class Attacher_Plugin {
         }
     }
 
-        /**
+    /**
      * Serves settings page
      */
     public static function loadSettingsPage() {
@@ -254,10 +259,13 @@ class Attacher_Plugin {
         }
         
         if ( 'post' == $post->post_type ) {
+            if ( ! ( self::getServiceRestUrl() && self::getServiceUsername() && self::getServicePassword() ) ) {
+                return;
+            }
             $service = new Social_Semantic_Server_Rest(
-                    get_option( 'attacher_service_rest_url', '' ),
-                    get_option('attacher_service_username', '' ),
-                    get_option( 'attacher_service_password', '' )
+                    self::getServiceRestUrl(),
+                    self::getServiceUsername(),
+                    self::getServicePassword()
                     );
             if ( !$service->isConnectionEstablished() ) {
                 error_log( 'NO SERVICE CONNECTION' );
@@ -319,6 +327,55 @@ class Attacher_Plugin {
                     }
                 }
             }
+        }
+    }
+    
+    /**
+     * Retruns service REST API URL.
+     * @return string
+     */
+    public static function getServiceRestUrl() {
+        return get_option( 'attacher_service_rest_url', '' );
+    }
+    
+    /**
+     * Retutns service ClientSide JS URL.
+     * @return string
+     */
+    public static function getServiceUrl() {
+        return get_option( 'attacher_service_url', '' );
+    }
+    
+    /**
+     * Returns service username
+     * @return String
+     */
+    public static function getServiceUsername() {
+        return get_option( 'attacher_service_username', '' );
+    }
+    
+    /**
+     * Returns service password
+     * @return String
+     */
+    public static function getServicePassword() {
+        return get_option( 'attacher_service_password', '' );
+    }
+
+        /**
+     * Display admin notices
+     */
+    public static function adminNotices() {
+        if ( ! ( self::getServiceRestUrl() && self::getServiceUrl() ) ) {
+            echo '<div class="error">';
+                echo '<p>' . sprintf( __( 'SocialSemanticServer location not set! Please visit the <a href="%s">settings</a> page.', self::getTextDomain() ), admin_url( 'options-general.php?page=attacher' ) ) . '</p>';
+            echo '</div>';
+        }
+        
+        if ( ! ( self::getServiceUsername() && self::getServicePassword() ) ) {
+            echo '<div class="error">';
+                echo '<p>' . sprintf( __( 'Service username or possword not set! Please visit the <a href="%s">settings</a> page.', self::getTextDomain() ), admin_url( 'options-general.php?page=attacher' ) ) . '</p>';
+            echo '</div>';
         }
     }
 }

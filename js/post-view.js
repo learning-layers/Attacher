@@ -58,6 +58,11 @@
             holder.find('.attacher-raiting a').on('click', function(e) {
                 e.preventDefault();
                 var score = $(this).data('score');
+                var user_uri = AttacherData.user;
+                // In case of anonymous user add IP to URI
+                if ('1' !== AttacherData.is_user_logged_in) {
+                    user_uri += '_' + AttacherData.user_ip;
+                }
                 new SSRatingUserSet().handle(
                         function(result) {
                             attacher_add_update_raiting(holder, post_uri);
@@ -65,7 +70,7 @@
                         function(result) {
                             attacher_service_error();
                         },
-                        AttacherData.user + '_' + AttacherData.user_ip,
+                        user_uri,
                         AttacherData.key,
                         post_uri,
                         score
