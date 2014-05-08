@@ -38,10 +38,10 @@ class Social_Semantic_Server_Rest {
     private $connection_established = false;
     
     /**
-     * 
-     * @param string $uri
-     * @param string $username
-     * @param string $password
+     * Creates an instance
+     * @param string $uri       Service URI
+     * @param string $username  Service username
+     * @param string $password  Service password
      */
     public function __construct( $uri, $username, $password ) {
         $this->uri = $uri;
@@ -51,9 +51,7 @@ class Social_Semantic_Server_Rest {
         // TODO It might be a good idea to raise an error if either auth or
         // login fails
         if ( $this->authCheckCred() ) {
-            if ( $this->userLogin() ) {
-                $this->connection_established = true;
-            }
+            $this->connection_established = true;
         }
     }
     
@@ -119,8 +117,8 @@ class Social_Semantic_Server_Rest {
     }
     
     /**
-     * Make a credentials check call. Will store the returned key for further
-     * service calls.
+     * Make a credentials check call. Will store the returned key and user
+     * URI for further service calls.
      * @return boolean
      */
     public function authCheckCred() {
@@ -135,26 +133,6 @@ class Social_Semantic_Server_Rest {
         
         if ( ! is_wp_error( $result ) ) {
             $this->key = $result->{$result->op}->key;
-            return TRUE;
-        }
-        return FALSE;
-    }
-    
-    /**
-     * Make a user login call and store the returned user URI for use with
-     * further calls.
-     * @return boolean
-     */
-    public function userLogin() {
-        $body = array(
-            'key' => $this->key,
-            'op' => 'userLogin',
-            'user' => 'mailto:dummyUser',
-            'userLabel' => $this->username,
-        );
-        $result = $this->makeRequest( 'userLogin', $body );
-        
-        if ( ! is_wp_error( $result ) ) {
             $this->user = $result->{$result->op}->uri;
             return TRUE;
         }

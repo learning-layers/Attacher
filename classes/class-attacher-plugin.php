@@ -362,7 +362,7 @@ class Attacher_Plugin {
         return get_option( 'attacher_service_password', '' );
     }
 
-        /**
+    /**
      * Display admin notices
      */
     public static function adminNotices() {

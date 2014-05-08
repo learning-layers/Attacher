@@ -161,17 +161,8 @@ function attacher_service_authenticate(callback, error_callback) {
     new SSAuthCheckCred().handle(
             function(result) {
                 AttacherData.key = result.key;
-                new SSUserLogin().handle(
-                        function(result) {
-                            AttacherData.user = result.uri;
-                            callback();
-                        },
-                        function(result) {
-                            error_callback();
-                        },
-                        AttacherData.service_username,
-                        AttacherData.key
-                        );
+                AttacherData.user = result.uri;
+                callback();
             },
             function(result) {
                 error_callback();
