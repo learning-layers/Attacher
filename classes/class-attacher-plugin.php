@@ -194,15 +194,7 @@ class Attacher_Plugin {
             'jsglobals'                 => 'JSUtilities/JSGlobals.js',
             'ssglobals'                 => '/SSSClientInterfaceGlobals/globals/SSGlobals.js',
             'ssvaru'                    => 'SSSClientInterfaceGlobals/globals/SSVarU.js',
-            'ssusereventconnwrapper'    => 'SSSClientInterfaceREST/connectors/wrapper/SSUserEventConnWrapper.js',
-            'ssauthconns'               => 'SSSClientInterfaceREST/connectors/SSAuthConns.js',
-            'sscollconns'               => 'SSSClientInterfaceREST/connectors/SSCollConns.js',
-            'ssuserconns'               => 'SSSClientInterfaceREST/connectors/SSUserConns.js',
-            'sstagconns'                => 'SSSClientInterfaceREST/connectors/SSTagConns.js',
-            'ssfileconns'               => 'SSSClientInterfaceREST/connectors/SSFileConns.js',
-            'ssfiledownload'            => 'SSSClientInterfaceREST/connectors/SSFileDownload.js',
-            'sssearchconns'             => 'SSSClientInterfaceREST/connectors/SSSearchConns.js',
-            'ssratingconns'             => 'SSSClientInterfaceREST/connectors/SSRatingConns.js',
+            'ssconns'                   => 'SSSClientInterfaceREST/SSConns.js',
         );
         
         foreach ( $scripts as $s_key => $s_val ) {
@@ -274,7 +266,7 @@ class Attacher_Plugin {
             
             $entity_uri = wp_get_shortlink( $post->ID );
             
-            $root_collection = $service->collUserRootGet();
+            $root_collection = $service->collRootGet();
             $attacher_shared_resources_uri = NULL;
             $attacher_shared_resources_title = 'Attacher Shared Resources';
             
@@ -293,12 +285,12 @@ class Attacher_Plugin {
             // Create "Attacher Shard Resources" collections if not exists, also
             // set it to be shared (public).
             if ( ! $attacher_shared_resources_uri ) {
-                $attacher_shared_resources = $service->collUserEntryAdd( $root_collection->uri, null, $attacher_shared_resources_title, true );
-                $attacher_shared_resources_uri = $attacher_shared_resources->collUserEntryAdd->uri;
-                $service->entityUserPublicSet( $attacher_shared_resources_uri ); 
+                $attacher_shared_resources = $service->collEntryAdd( $root_collection->uri, null, $attacher_shared_resources_title, true );
+                $attacher_shared_resources_uri = $attacher_shared_resources->collEntryAdd->uri;
+                $service->entityPublicSet( $attacher_shared_resources_uri ); 
             }
             
-            $entry_added = $service->collUserEntryAdd( $attacher_shared_resources_uri, $entity_uri, $post->post_title, false );
+            $entry_added = $service->collEntryAdd( $attacher_shared_resources_uri, $entity_uri, $post->post_title, false );
             
             // TODO it might be a good idea to check if a resource already exists
             $entity = $service->entityDescGet( $entity_uri, true, true, true );
@@ -323,7 +315,7 @@ class Attacher_Plugin {
                     if ( ! in_array( $tag, $existing_tags ) ) {
                         $service->tagAdd( $entity_uri, $tag, $service::SPACE_SHARED );
                     } else if ( ! in_array( $tag, $tags ) ) {
-                        $service->tagsUserRemove( $entity_uri, $tag, $service::SPACE_SHARED );
+                        $service->tagsRemove( $entity_uri, $tag, $service::SPACE_SHARED );
                     }
                 }
             }

@@ -66,10 +66,17 @@ class Social_Semantic_Server_Rest {
     
     /**
      * Used to log error request data to error_log
-     * @param mixed $data
+     * @param mixed $data 
+     * @param array $body Request body (optional)
      */
-    private function logError( $data ) {
+    private function logError( $data, $body = null) {
+        error_log( 'Service call ERROR' );
+        error_log( 'START' );
         error_log( print_r( $data, true ) );
+        if ( isset( $body ) && !empty( $body ) ) {
+            error_log( print_r( $body, true ) );
+        }
+        error_log( 'END' );
     }
     
     /**
@@ -104,14 +111,14 @@ class Social_Semantic_Server_Rest {
         $result = wp_remote_post( $request_url, $args );
         
         if ( is_wp_error( $result ) ) {
-            $this->logError( $result );
+            $this->logError( $result, $body );
             return $result;
         } else {
             if ( 200 == $result['response']['code'] ) {
                 return $this->checkRequestBodyForErrorsAndReturn( $result['body'] );
             } else {
-                $this->logError( $result ); 
-                return WP_Error( $result['response']['code'], 'Got response code error' );
+                $this->logError( $result, $body ); 
+                return new WP_Error( $result['response']['code'], 'Got response code error' );
             }
         }
     }
@@ -149,13 +156,13 @@ class Social_Semantic_Server_Rest {
      * collection (entry URI is not needed in that case)
      * @return mixed
      */
-    public function collUserEntryAdd( $coll, $collEntry, $collEntryLabel, $addNewColl ) {
+    public function collEntryAdd( $coll, $collEntry, $collEntryLabel, $addNewColl ) {
         $body = array(
             'key' => $this->key,
             'user' => $this->user,
             'coll' => $coll,
             'collEntryLabel' => $collEntryLabel,
-            'op' => 'collUserEntryAdd',
+            'op' => 'collEntryAdd',
         );
         
         if ( $collEntry ) {
@@ -165,7 +172,7 @@ class Social_Semantic_Server_Rest {
             $body['addNewColl'] = $addNewColl;
         }
 
-        return $this->makeRequest( 'collUserEntryAdd', $body );
+        return $this->makeRequest( 'collEntryAdd', $body );
     }
     
     /**
@@ -213,31 +220,31 @@ class Social_Semantic_Server_Rest {
      * @param string $space     Either sharedSpace or privateSpace
      * @return mixed
      */
-    public function tagsUserRemove( $resource, $tagString, $space ) {
+    public function tagsRemove( $resource, $tagString, $space ) {
         $body = array(
             'key' => $this->key,
             'user' => $this->user,
             'resource' => $resource,
             'tagString' => $tagString,
-            'op' => 'tagsUserRemove',
+            'op' => 'tagsRemove',
             'space' => $space,
         );
         
-        return $this->makeRequest( 'tagsUserRemove', $body );
+        return $this->makeRequest( 'tagsRemove', $body );
     }
     
     /**
      * Get user root collection.
      * @return mixed
      */
-    public function collUserRootGet() {
+    public function collRootGet() {
         $body = array(
             'key' => $this->key,
             'user' => $this->user,
-            'op' => 'collUserRootGet',
+            'op' => 'collRootGet',
         );
         
-        $result = $this->makeRequest( 'collUserRootGet', $body );
+        $result = $this->makeRequest( 'collRootGet', $body );
         
         if ( ! is_wp_error( $result ) ) {
             return $result->{$result->op}->coll;
@@ -280,16 +287,16 @@ class Social_Semantic_Server_Rest {
      * @param int       $value      Value from 1 to 5
      * @return mixed
      */
-    public function ratingUserSet( $resource, $value ) {
+    public function ratingSet( $resource, $value ) {
         $body = array(
             'key' => $this->key,
             'user' => $this->user,
-            'op' => 'ratingUserSet',
+            'op' => 'ratingSet',
             'resource' => $resource,
             'value' => $value,
         );
         
-        $result = $this->makeRequest( 'ratingUserSet', $body );
+        $result = $this->makeRequest( 'ratingSet', $body );
         
         if ( ! is_wp_error( $result ) ) {
             return true;
@@ -303,14 +310,14 @@ class Social_Semantic_Server_Rest {
      * @param string $entityUri Entity URI
      * @return mixed
      */
-    public function entityUserPublicSet( $entityUri ) {
+    public function entityPublicSet( $entityUri ) {
         $body = array(
             'key' => $this->key,
             'user' => $this->user,
-            'op' => 'entityUserPublicSet',
+            'op' => 'entityPublicSet',
             'entityUri' => $entityUri,
         );
         
-        return $this->makeRequest( 'entityUserPublicSet', $body );
+        return $this->makeRequest( 'entityPublicSet', $body );
     }    
 }

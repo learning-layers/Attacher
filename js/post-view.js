@@ -63,7 +63,7 @@
                 if ('1' !== AttacherData.is_user_logged_in) {
                     user_uri += '_' + AttacherData.user_ip;
                 }
-                new SSRatingUserSet().handle(
+                new SSRatingSet(
                         function(result) {
                             attacher_add_update_raiting(holder, post_uri);
                         },

@@ -80,33 +80,6 @@
          * @param {object} result Service call result object
          */
         function deal_with_tags(result) {
-            /**
-             * Callback that populates resources
-             * @param {object} result   Service call result object
-             */
-            function deal_with_resources(result) {
-                var collection_resources = $('#attacher-resources').find('.attacher-collection-resources');
-
-                if (result.searchResults) {
-                    $.each(result.searchResults, function(key, entry) {
-                        if ('coll' !== entry.type) {
-                            var resource_class = 'attacher-resource';
-                            if ('file' == entry.type) {
-                                resource_class += ' attacher-downloadable-file';
-                            }
-                            if (sSGlobals.spacePrivate === entry.space) {
-                                resource_class += ' attacher-resource-private';
-                            } else if (sSGlobals.spaceShared === entry.space) {
-                                resource_class += ' attacher-resource-shared';
-                            }
-                            collection_resources.append('<li><a href="' + entry.uri + '" target="_blank" class="' + resource_class + '" data-label="' + entry.label + '">' + entry.label + '</a></li>');
-                        }
-                    });
-                    attacher_initialize_draggable(collection_resources);
-                    attacher_initialize_downloadable_files(collection_resources);
-                }
-            }
-
             var collections_select = $('#attacher-resources').find('select[name="attacher-collection"]');
             var collection_tagcloud = $('#attacher-resources').find('.attacher-collection-tagcloud');
             var collection_resources = $('#attacher-resources').find('.attacher-collection-resources');
@@ -138,9 +111,56 @@
                     collection_resources.empty();
                     collection_tagcloud.find('a').removeClass('selected');
                     $(e.target).addClass('selected');
-                    
+
                     attacher_service_search_tags_within_entity(deal_with_resources, attacher_service_error, collections_select.val(), [$(this).data('tag')], collections_select.find(':selected').data('author'));
                 });
+            }
+        }
+
+        /**
+         * Callback that populates resources
+         * @param {object} result   Service call result object
+         */
+        function deal_with_resources(resources) {
+            var collection_resources = $('#attacher-resources').find('.attacher-collection-resources');
+
+            if (resources) {
+                $.each(resources, function(key, entry) {
+                    // This habdles results from two different methods that have
+                    // different structural elements, compensating for that.
+                    var type, space;
+                    
+                    if (entry.entityType) {
+                        type = entry.entityType;
+                    } else {
+                        type = entry.type;
+                    }
+                    
+                    if (entry.circleTypes) {
+                        if ($.inArray('pub', entry.circleTypes) != -1) {
+                            space = sSGlobals.spaceShared;
+                        } else if ($.inArray('priv', entry.circleTypes) != -1) {
+                            space = sSGlobals.spacePrivate;
+                        }
+                    } else {
+                        space = entry.space;
+                    }
+                    
+                    if ('coll' !== type) {
+                        var resource_class = 'attacher-resource';
+                        if ('file' == type) {
+                            resource_class += ' attacher-downloadable-file';
+                        }
+                        if (sSGlobals.spacePrivate === space) {
+                            resource_class += ' attacher-resource-private';
+                        } else if (sSGlobals.spaceShared === space) {
+                            resource_class += ' attacher-resource-shared';
+                        }
+                        collection_resources.append('<li><a href="' + entry.uri + '" target="_blank" class="' + resource_class + '" data-label="' + entry.label + '">' + entry.label + '</a></li>');
+                    }
+                });
+                attacher_initialize_draggable(collection_resources);
+                attacher_initialize_downloadable_files(collection_resources);
             }
         }
 
@@ -172,6 +192,7 @@
 
             if (collection_uri) {
                 attacher_service_get_collection_tags(deal_with_tags, attacher_service_error, collection_uri, collection_autor);
+                attacher_service_get_collection_with_entries(deal_with_resources, attacher_service_error, collection_uri);
             }
         });
 

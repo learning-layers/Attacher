@@ -32,7 +32,7 @@ function attacher_service_error() {
  * @param {function} error_callback   Error collback
  */
 function attacher_service_get_root_collection(callback, error_callback) {
-    new SSCollUserRootGet().handle(
+    new SSCollRootGet(
             function(result) {
                 callback(result);
             },
@@ -50,7 +50,7 @@ function attacher_service_get_root_collection(callback, error_callback) {
  * @param {function} error_callback   Error collback
  */
 function attacher_service_get_user_collections(callback, error_callback) {
-    new SSCollsUserWithEntries().handle(
+    new SSCollsWithEntries(
             function(result) {
                 callback(result);
             },
@@ -68,7 +68,7 @@ function attacher_service_get_user_collections(callback, error_callback) {
  * @param {function} error_callback Error callback
  */
 function attacher_service_get_user_could_subscribe_collections(callback, error_callback) {
-    new SSCollsUserCouldSubscribeGet().handle(
+    new SSCollsCouldSubscribeGet(
             function(result) {
                 callback(result);
             },
@@ -92,7 +92,7 @@ function attacher_service_get_collection_tags(callback, error_callback, collecti
         user = AttacherData.user;
 
     }
-    new SSCollUserCumulatedTagsGet().handle(
+    new SSCollCumulatedTagsGet(
             function(result) {
                 callback(result);
             },
@@ -112,9 +112,10 @@ function attacher_service_get_collection_tags(callback, error_callback, collecti
  * @param {function} collection_uri   Collection URI
  */
 function attacher_service_get_collection_with_entries(callback, error_callback, collection_uri) {
-    new SSCollUserWithEntries().handle(
+    new SSCollWithEntries(
             function(result) {
-                callback(result);
+                console.log(result.coll.entries);
+                callback(result.coll.entries);
             },
             function(result) {
                 error_callback();
@@ -136,9 +137,9 @@ function attacher_service_search_tags_within_entity(callback, error_callback, en
     if (!user) {
         user = AttacherData.user;
     }
-    new SSSearchWithTagsWithinEntity().handle(
+    new SSSearchWithTagsWithinEntity(
             function(result) {
-                callback(result);
+                callback(result.searchResults);
             },
             function(result) {
                 error_callback();
@@ -158,7 +159,7 @@ function attacher_service_search_tags_within_entity(callback, error_callback, en
  * @param {function} error_callback   Error callback
  */
 function attacher_service_authenticate(callback, error_callback) {
-    new SSAuthCheckCred().handle(
+    new SSAuthCheckCred(
             function(result) {
                 AttacherData.key = result.key;
                 AttacherData.user = result.uri;
@@ -180,10 +181,10 @@ function attacher_service_authenticate(callback, error_callback) {
  */
 function attacher_service_download_file(error_callback, uri, label) {
     // The solution might be to first call SSFileExtGet, and only then the file download code
-    new SSFileExtGet().handle(
+    new SSFileExtGet(
             function(result) {
                 var mimeType = result.fileExt;
-                new SSFileDownload().handle(
+                new SSFileDownload(
                         function(result) {
                             var a = document.createElement("a");
 
@@ -222,7 +223,7 @@ function attacher_service_download_file(error_callback, uri, label) {
  * @param {String}      uri             Entity URI
  */
 function attacher_service_raiting_overall_get(callback, error_callback, uri) {
-    new SSRatingOverallGet().handle(
+    new SSRatingOverallGet(
             function(result) {
                 callback(result);
             },
