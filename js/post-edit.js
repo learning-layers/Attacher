@@ -156,7 +156,7 @@
                         } else if (sSGlobals.spaceShared === space) {
                             resource_class += ' attacher-resource-shared';
                         }
-                        collection_resources.append('<li><a href="' + entry.uri + '" target="_blank" class="' + resource_class + '" data-label="' + entry.label + '">' + entry.label + '</a></li>');
+                        collection_resources.append('<li><a href="' + entry.id + '" target="_blank" class="' + resource_class + '" data-label="' + entry.label + '">' + entry.label + '</a></li>');
                     }
                 });
                 attacher_initialize_draggable(collection_resources);
