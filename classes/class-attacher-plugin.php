@@ -274,9 +274,9 @@ class Attacher_Plugin {
             // collection.
             if ( $root_collection->entries && is_array( $root_collection->entries ) && sizeof( $root_collection->entries > 0 ) ) {
                 foreach ( $root_collection->entries as $entry ) {
-                    if ( 'coll' == $entry->entityType ) {
+                    if ( 'coll' == $entry->type ) {
                         if ( $attacher_shared_resources_title == $entry->label ) {
-                            $attacher_shared_resources_uri = $entry->uri;
+                            $attacher_shared_resources_uri = $entry->id;
                         }
                     }
                 }
@@ -285,8 +285,8 @@ class Attacher_Plugin {
             // Create "Attacher Shard Resources" collections if not exists, also
             // set it to be shared (public).
             if ( ! $attacher_shared_resources_uri ) {
-                $attacher_shared_resources = $service->collEntryAdd( $root_collection->uri, null, $attacher_shared_resources_title, true );
-                $attacher_shared_resources_uri = $attacher_shared_resources->collEntryAdd->uri;
+                $attacher_shared_resources = $service->collEntryAdd( $root_collection->id, null, $attacher_shared_resources_title, true );
+                $attacher_shared_resources_uri = $attacher_shared_resources->collEntryAdd->entity;
                 $service->entityPublicSet( $attacher_shared_resources_uri ); 
             }
             

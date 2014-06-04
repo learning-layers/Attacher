@@ -170,7 +170,7 @@
 
         if (result.colls) {
             $.each(result.colls, function(key, coll) {
-                collections_select.append('<option value="' + coll.uri + '" data-author="' + coll.author + '">' + coll.label + '</option>');
+                collections_select.append('<option value="' + coll.id + '" data-author="' + coll.author + '">' + coll.label + '</option>');
             });
         }
         
@@ -178,7 +178,7 @@
         attacher_service_get_user_could_subscribe_collections(function(result) {
             if (result.colls) {
                 $.each(result.colls, function(key, coll) {
-                    collections_select.append('<option value="' + coll.uri + '" data-author="' + coll.author + '">' + coll.label + '</option>');
+                    collections_select.append('<option value="' + coll.id + '" data-author="' + coll.author + '">' + coll.label + '</option>');
                 });
             }
         }, attacher_service_error);

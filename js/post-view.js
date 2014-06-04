@@ -51,7 +51,7 @@
                     raiting_html += '<a href="#" data-score="' + i + '"><div class="dashicons dashicons-star-empty"></div></a>';
                 }
             }
-            raiting_html += '<div class="attacher-raiting-frequency">(' + result.ratingOverall.frequency + ')</div>';
+            raiting_html += '<div class="attacher-raiting-frequency">(' + result.ratingOverall.frequ + ')</div>';
             raiting_html += '</div>';
             holder.append(raiting_html);
 

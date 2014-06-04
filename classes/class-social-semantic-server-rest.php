@@ -30,6 +30,21 @@ class Social_Semantic_Server_Rest {
     const SPACE_SHARED = 'sharedSpace';
     const SPACE_PRIVATE = 'privateSpace';
     
+    const SC_KEY = 'key';
+    const SC_OP = 'op';
+    const SC_PASSWORD = 'password';
+    const SC_USER = 'user';
+    const SC_LABEL = 'label';
+    const SC_COLL = 'coll';
+    const SC_ADD_NEW_COLL = 'addNewColl';
+    const SC_ENTRY = 'entry';
+    const SC_ENTITY = 'entity';
+    const SC_SPACE = 'space';
+    const SC_GET_TAGS = 'getTags';
+    const SC_GET_OVERALL_RATING = 'getOverallRating';
+    const SC_GET_DISCS = 'getDiscs';
+    const SC_VALUE = 'value';
+    
     private $uri;
     private $username;
     private $password;
@@ -130,17 +145,17 @@ class Social_Semantic_Server_Rest {
      */
     public function authCheckCred() {
         $body = array(
-            'key' => 'someKey',
-            'op' => 'authCheckCred',
-            'pass' => $this->password,
-            'user' => 'mailto:dummyUser',
-            'userLabel' => $this->username,
+            self::SC_KEY => 'someKey',
+            self::SC_OP => 'authCheckCred',
+            self::SC_PASSWORD => $this->password,
+            self::SC_USER => 'mailto:dummyUser',
+            self::SC_LABEL => $this->username,
         );
         $result = $this->makeRequest( 'authCheckCred', $body );
         
         if ( ! is_wp_error( $result ) ) {
             $this->key = $result->{$result->op}->key;
-            $this->user = $result->{$result->op}->uri;
+            $this->user = $result->{$result->op}->user;
             return TRUE;
         }
         return FALSE;
@@ -149,27 +164,27 @@ class Social_Semantic_Server_Rest {
     /**
      * Add an entry to a collection.
      * @param string    $coll               Collection URI
-     * @param string    $collEntry          Collection entry URI (will not be
+     * @param string    $entry          Collection entry URI (will not be
      * sent to service if empty)
-     * @param string    $collEntryLabel     New entry label
+     * @param string    $label     New entry label
      * @param boolean   $addNewColl         Inficator if newly added entry is a
      * collection (entry URI is not needed in that case)
      * @return mixed
      */
-    public function collEntryAdd( $coll, $collEntry, $collEntryLabel, $addNewColl ) {
+    public function collEntryAdd( $coll, $entry, $label, $addNewColl ) {
         $body = array(
-            'key' => $this->key,
-            'user' => $this->user,
-            'coll' => $coll,
-            'collEntryLabel' => $collEntryLabel,
-            'op' => 'collEntryAdd',
+            self::SC_KEY => $this->key,
+            self::SC_USER => $this->user,
+            self::SC_COLL => $coll,
+            self::SC_LABEL => $label,
+            self::SC_OP => 'collEntryAdd',
         );
         
-        if ( $collEntry ) {
-            $body['collEntry'] = $collEntry;
+        if ( $entry ) {
+            $body[self::SC_ENTRY] = $entry;
         }
         if ( $addNewColl ) {
-            $body['addNewColl'] = $addNewColl;
+            $body[self::SC_ADD_NEW_COLL] = $addNewColl;
         }
 
         return $this->makeRequest( 'collEntryAdd', $body );
@@ -177,17 +192,17 @@ class Social_Semantic_Server_Rest {
     
     /**
      * Update existing entity label.
-     * @param string $entityUri Entity URI
+     * @param string $entity Entity URI
      * @param string $label     New label
      * @return mixed
      */
-    public function entityLabelSet( $entityUri, $label ) {
+    public function entityLabelSet( $entity, $label ) {
         $body = array(
-            'key' => $this->key,
-            'user' => $this->user,
-            'op' => 'entityLabelSet',
-            'entityUri' => $entityUri,
-            'label' => $label,
+            self::SC_KEY => $this->key,
+            self::SC_USER => $this->user,
+            self::SC_OP => 'entityLabelSet',
+            self::SC_ENTITY => $entity,
+            self::SC_LABEL => $label,
         );
         
         return $this->makeRequest( 'entityLabelSet', $body );
@@ -195,19 +210,19 @@ class Social_Semantic_Server_Rest {
     
     /**
      * Add a tag to an entity.
-     * @param string $resource  Entity URI
-     * @param string $tagString Tag    
+     * @param string $entity  Entity URI
+     * @param string $label Tag    
      * @param string $space     Either sharedSpace or privateSpace
      * @return mixed
      */
-    public function tagAdd( $resource, $tagString, $space ) {
+    public function tagAdd( $entity, $label, $space ) {
         $body = array(
-            'key' => $this->key,
-            'user' => $this->user,
-            'resource' => $resource,
-            'tagString' => $tagString,
-            'op' => 'tagAdd',
-            'space' => $space,
+            self::SC_KEY => $this->key,
+            self::SC_USER => $this->user,
+            self::SC_ENTITY => $entity,
+            self::SC_LABEL => $label,
+            self::SC_OP => 'tagAdd',
+            self::SC_SPACE => $space,
         );
         
         return $this->makeRequest( 'tagAdd', $body );
@@ -215,20 +230,27 @@ class Social_Semantic_Server_Rest {
     
     /**
      * Remove a tag.
-     * @param string $resource  Entity URI
-     * @param string $tagString Tag
+     * @param string $entity    Entity URI
+     * @param string $label     Tag
      * @param string $space     Either sharedSpace or privateSpace
      * @return mixed
      */
-    public function tagsRemove( $resource, $tagString, $space ) {
+    public function tagsRemove( $entity, $label, $space ) {
         $body = array(
-            'key' => $this->key,
-            'user' => $this->user,
-            'resource' => $resource,
-            'tagString' => $tagString,
-            'op' => 'tagsRemove',
-            'space' => $space,
+            self::SC_KEY => $this->key,
+            self::SC_USER => $this->user,
+            self::SC_OP => 'tagsRemove',
         );
+        
+        if ( $entity ) {
+            $body[self::SC_ENTITY] = $entity;
+        }     
+        if ( $label ) {
+            $body[self::SC_LABEL] = $label; 
+        }
+        if ( $space ) {
+            $body[self::SC_SPACE] = $space;
+        }
         
         return $this->makeRequest( 'tagsRemove', $body );
     }
@@ -239,9 +261,9 @@ class Social_Semantic_Server_Rest {
      */
     public function collRootGet() {
         $body = array(
-            'key' => $this->key,
-            'user' => $this->user,
-            'op' => 'collRootGet',
+            self::SC_KEY => $this->key,
+            self::SC_USER => $this->user,
+            self::SC_OP => 'collRootGet',
         );
         
         $result = $this->makeRequest( 'collRootGet', $body );
@@ -255,27 +277,34 @@ class Social_Semantic_Server_Rest {
     
     /**
      * Get and additional information for an entity.
-     * @param string    $entityUri          Entity URI
-     * @param boolean   $getDiscUris        Flag to include didcussions
+     * @param string    $entity          Entity URI
+     * @param boolean   $getTags        Flag to include tags
      * @param boolean   $getOverallRating   Flag to include raiting information
-     * @param boolean   $getTags            Flag to include tags
+     * @param boolean   $getDiscs            Flag to include discussions
      * @return mixed
      */
-    public function entityDescGet( $entityUri, $getDiscUris = true, $getOverallRating = true, $getTags = true) {
+    public function entityDescGet( $entity, $getTags = true, $getOverallRating = true, $getDiscs = true) {
         $body = array(
-            'key' => $this->key,
-            'user' => $this->user,
-            'op' => 'entityDescGet',
-            'entityUri' => $entityUri,
-            'getDiscUris' => $getDiscUris,
-            'getOverallRating' => $getOverallRating,
-            'getTags' => $getTags,
+            self::SC_KEY => $this->key,
+            self::SC_USER => $this->user,
+            self::SC_OP => 'entityDescGet',
+            self::SC_ENTITY => $entity,
         );
+        
+        if ( $getTags ) {
+            $body[self::SC_GET_TAGS] = $getTags;
+        }
+        if ( $getOverallRating ) {
+            $body[self::SC_GET_OVERALL_RATING] = $getOverallRating;
+        }
+        if ( $getDiscs ) {
+            $body[self::SC_GET_DISCS] = $getDiscs;
+        }
         
         $result = $this->makeRequest( 'entityDescGet', $body );
         
         if ( ! is_wp_error( $result ) ) {
-            return $result->{$result->op}->entityDesc;
+            return $result->{$result->op}->desc;
         }
         
         return $result;
@@ -283,17 +312,17 @@ class Social_Semantic_Server_Rest {
     
     /**
      * Set raiting for an entity.
-     * @param string    $resource   Entity URI
+     * @param string    $entity   Entity URI
      * @param int       $value      Value from 1 to 5
      * @return mixed
      */
-    public function ratingSet( $resource, $value ) {
+    public function ratingSet( $entity, $value ) {
         $body = array(
-            'key' => $this->key,
-            'user' => $this->user,
-            'op' => 'ratingSet',
-            'resource' => $resource,
-            'value' => $value,
+            self::SC_KEY => $this->key,
+            self::SC_USER => $this->user,
+            self::SC_OP => 'ratingSet',
+            self::SC_ENTITY => $entity,
+            self::SC_VALUE => $value,
         );
         
         $result = $this->makeRequest( 'ratingSet', $body );
@@ -307,15 +336,15 @@ class Social_Semantic_Server_Rest {
     
     /**
      * Make entity public (mostly applicable to a collection).
-     * @param string $entityUri Entity URI
+     * @param string $entity Entity URI
      * @return mixed
      */
-    public function entityPublicSet( $entityUri ) {
+    public function entityPublicSet( $entity ) {
         $body = array(
-            'key' => $this->key,
-            'user' => $this->user,
-            'op' => 'entityPublicSet',
-            'entityUri' => $entityUri,
+            self::SC_KEY => $this->key,
+            self::SC_USER => $this->user,
+            self::SC_OP => 'entityPublicSet',
+            self::SC_ENTITY => $entity,
         );
         
         return $this->makeRequest( 'entityPublicSet', $body );

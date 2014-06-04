@@ -114,7 +114,6 @@ function attacher_service_get_collection_tags(callback, error_callback, collecti
 function attacher_service_get_collection_with_entries(callback, error_callback, collection_uri) {
     new SSCollWithEntries(
             function(result) {
-                console.log(result.coll.entries);
                 callback(result.coll.entries);
             },
             function(result) {
@@ -162,7 +161,7 @@ function attacher_service_authenticate(callback, error_callback) {
     new SSAuthCheckCred(
             function(result) {
                 AttacherData.key = result.key;
-                AttacherData.user = result.uri;
+                AttacherData.user = result.user;
                 callback();
             },
             function(result) {
