@@ -200,7 +200,7 @@ class Social_Semantic_Server_Rest {
      * @param string $comments    New comments text (optional)
      * @return mixed
      */
-    public function entityUpdate( $entity, $label, $description, $comments ) {
+    public function entityUpdate( $entity, $label = '', $description = '', $comments = '' ) {
         $body = array(
             self::SC_KEY => $this->key,
             self::SC_USER => $this->user,
