@@ -44,6 +44,8 @@ class Social_Semantic_Server_Rest {
     const SC_GET_OVERALL_RATING = 'getOverallRating';
     const SC_GET_DISCS = 'getDiscs';
     const SC_VALUE = 'value';
+    const SC_DESCRIPTION = 'description';
+    const SC_COMMENTS = 'comments';
     
     private $uri;
     private $username;
@@ -63,8 +65,7 @@ class Social_Semantic_Server_Rest {
         $this->username = $username;
         $this->password = $password;
         
-        // TODO It might be a good idea to raise an error if either auth or
-        // login fails
+        // TODO It might be a good idea to raise an error if auth fails
         if ( $this->authCheckCred() ) {
             $this->connection_established = true;
         }
@@ -191,21 +192,33 @@ class Social_Semantic_Server_Rest {
     }
     
     /**
-     * Update existing entity label.
-     * @param string $entity Entity URI
-     * @param string $label     New label
+     * Update existing entity. Any optional parameter left empty will not be
+     * sent to the service.
+     * @param string $entity      Entity URI
+     * @param string $label       New label (optional)
+     * @param string $description New description (optional)
+     * @param string $comments    New comments text (optional)
      * @return mixed
      */
-    public function entityLabelSet( $entity, $label ) {
+    public function entityUpdate( $entity, $label, $description, $comments ) {
         $body = array(
             self::SC_KEY => $this->key,
             self::SC_USER => $this->user,
-            self::SC_OP => 'entityLabelSet',
+            self::SC_OP => 'entityUpdate',
             self::SC_ENTITY => $entity,
-            self::SC_LABEL => $label,
         );
+            
+        if ( $label ) {
+            $body[self::SC_LABEL] = $label; 
+        }
+        if ( $description ) {
+            $body[self::SC_DESCRIPTION] = $description;
+        }
+        if ( $comments ) {
+            $body[self::SC_COMMENTS] = $comments;
+        }
         
-        return $this->makeRequest( 'entityLabelSet', $body );
+        return $this->makeRequest( 'entityUpdate', $body );
     }
     
     /**

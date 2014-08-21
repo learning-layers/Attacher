@@ -268,7 +268,7 @@ class Attacher_Plugin {
             
             $root_collection = $service->collRootGet();
             $attacher_shared_resources_uri = NULL;
-            $attacher_shared_resources_title = 'Attacher Shared Resources';
+            $attacher_shared_resources_title = self::getServiceUsername() . ' : Attacher Shared Resources';
             
             // Check if "Attacher Shared Resources" already exists within a root
             // collection.
@@ -290,13 +290,15 @@ class Attacher_Plugin {
                 $service->entityPublicSet( $attacher_shared_resources_uri ); 
             }
             
+            // TODO Need to get the contents of that shared collection and check
+            // if the post is already there
             $entry_added = $service->collEntryAdd( $attacher_shared_resources_uri, $entity_uri, $post->post_title, false );
             
             // TODO it might be a good idea to check if a resource already exists
             $entity = $service->entityDescGet( $entity_uri, true, true, true );
             
             if ( $post->title !== $entity->label) {
-                $service->entityLabelSet( $entity_uri, $post->post_title );
+                $service->entityUpdate( $entity_uri, $post->post_title );
             }
             
             $existing_tags = array();

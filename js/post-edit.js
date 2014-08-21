@@ -112,7 +112,7 @@
                     collection_tagcloud.find('a').removeClass('selected');
                     $(e.target).addClass('selected');
 
-                    attacher_service_search_tags_within_entity(deal_with_resources, attacher_service_error, collections_select.val(), [$(this).data('tag')], collections_select.find(':selected').data('author'));
+                    attacher_service_search_tags_within_entity(deal_with_resources, attacher_service_error, collections_select.val(), [$(this).data('tag')]);
                 });
             }
         }

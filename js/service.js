@@ -132,21 +132,35 @@ function attacher_service_get_collection_with_entries(callback, error_callback, 
  * @param {string}      entity_uri      Entity (collection) uri
  * @param {array}       tag_labels      Array of tag labels
  */
-function attacher_service_search_tags_within_entity(callback, error_callback, entity_uri, tag_labels, user) {
+function attacher_service_search_tags_within_entity(callback, error_callback, entity_uri, tag_labels) {
     if (!user) {
         user = AttacherData.user;
     }
-    new SSSearchWithTagsWithinEntity(
+    new SSSearch(
             function(result) {
-                callback(result.searchResults);
+                callback(result.entities);
             },
             function(result) {
                 error_callback();
             },
-            user,
+            AttacherData.user,
             AttacherData.key,
-            entity_uri,
-            tag_labels
+            null, // keywordsToSearchFor
+            false, // includeTextualContent
+            null, // wordsToSearchFor
+            true, // includeTags
+            tag_labels, // tagsToSearchFor
+            false, // includeMIs
+            null, // misToSearchFor
+            false, // includeLabel
+            null, // labelsToSearchFor
+            false, // includeDescription
+            null, // descriptionsToSearchFor
+            [], // typesToSearchOnlyFor
+            true, // includeOnlySubEntities
+            [entity_uri], // entitiesToSearchWithin
+            false, // includeRecommendedResults
+            false // provideEntries
             );
 }
 
