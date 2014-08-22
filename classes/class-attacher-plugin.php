@@ -67,7 +67,8 @@ class Attacher_Plugin {
             add_action( 'admin_menu', array( 'Attacher_Plugin', 'addMenuPages' ) );
             add_action( 'post_updated', array( 'Attacher_Plugin', 'savePost' ), 10, 2 );
             add_action( 'admin_notices', array( 'Attacher_Plugin', 'adminNotices' ) );
-
+            add_action( 'network_admin_menu', array( 'Attacher_Plugin', 'addNetworkMenuPages' ) );
+            add_action( 'network_admin_notices', array( 'Attacher_Plugin', 'networkAdminNotices' ) );
         }
     }
     
@@ -192,7 +193,7 @@ class Attacher_Plugin {
         
         $scripts = array(
             'jsglobals'                 => 'JSUtilities/JSGlobals.js',
-            'ssglobals'                 => '/SSSClientInterfaceGlobals/globals/SSGlobals.js',
+            'ssglobals'                 => 'SSSClientInterfaceGlobals/globals/SSGlobals.js',
             'ssvaru'                    => 'SSSClientInterfaceGlobals/globals/SSVarU.js',
             'ssconns'                   => 'SSSClientInterfaceREST/SSConns.js',
         );
@@ -222,14 +223,34 @@ class Attacher_Plugin {
             add_action( 'admin_init', array( 'Attacher_Plugin', 'registerSettings' ) );
         }
     }
+    
+    /**
+     * Add network administration menu pages
+     */
+    public static function addNetworkMenuPages() {
+        add_submenu_page('settings.php',
+                __( 'Attacher settings', self::getTextDomain() ),
+                __( 'Attacher settings', self::getTextDomain() ),
+                'manage_network_options',
+                'attacher',
+                array( 'Attacher_Plugin', 'loadNetworkSettingsPage' )
+                );
+    }
 
     /**
      * Serves settings page
      */
     public static function loadSettingsPage() {
-        include( ATTACHER_PLUGIN_DIR . '/views/settings-page.php');
+        include( ATTACHER_PLUGIN_DIR . '/views/settings-page.php' );
     }
     
+    /**
+     * Serves network settings page
+     */
+    public static function  loadNetworkSettingsPage() {
+        include( ATTACHER_PLUGIN_DIR . '/views/network-settings-page.php' );
+    }
+
     /**
      * Used with post_update action to make necessary service calls
      * @param int       $post_id    Post identifier
@@ -329,7 +350,7 @@ class Attacher_Plugin {
      * @return string
      */
     public static function getServiceRestUrl() {
-        return get_option( 'attacher_service_rest_url', '' );
+        return get_site_option( 'attacher_service_rest_url', '' );
     }
     
     /**
@@ -337,7 +358,7 @@ class Attacher_Plugin {
      * @return string
      */
     public static function getServiceUrl() {
-        return get_option( 'attacher_service_url', '' );
+        return get_site_option( 'attacher_service_url', '' );
     }
     
     /**
@@ -360,16 +381,50 @@ class Attacher_Plugin {
      * Display admin notices
      */
     public static function adminNotices() {
-        if ( ! ( self::getServiceRestUrl() && self::getServiceUrl() ) ) {
-            echo '<div class="error">';
-                echo '<p>' . sprintf( __( 'SocialSemanticServer location not set! Please visit the <a href="%s">settings</a> page.', self::getTextDomain() ), admin_url( 'options-general.php?page=attacher' ) ) . '</p>';
-            echo '</div>';
+       
+        if (!( self::getServiceRestUrl() && self::getServiceUrl() )) {
+            if (self::isMultisite()) {
+                if (is_super_admin()) {
+                    echo '<div class="error">';
+                    echo '<p>' . sprintf(__('SocialSemanticServer location not set! Please visit the <a href="%s">network settings</a> page.', self::getTextDomain()), network_admin_url('settings.php?page=attacher')) . '</p>';
+                    echo '</div>';
+                } else {
+                    echo '<div class="error">';
+                    echo '<p>' . __('SocialSemanticServer location not set! Please contact your network admin.', self::getTextDomain()) . '</p>';
+                    echo '</div>';
+                }
+            } else {
+                echo '<div class="error">';
+                echo '<p>' . sprintf(__('SocialSemanticServer location not set! Please visit the <a href="%s">settings</a> page.', self::getTextDomain()), admin_url('options-general.php?page=attacher')) . '</p>';
+                echo '</div>';
+            }
         }
-        
+
         if ( ! ( self::getServiceUsername() && self::getServicePassword() ) ) {
             echo '<div class="error">';
                 echo '<p>' . sprintf( __( 'Service username or possword not set! Please visit the <a href="%s">settings</a> page.', self::getTextDomain() ), admin_url( 'options-general.php?page=attacher' ) ) . '</p>';
             echo '</div>';
         }
+    }
+    
+    /**
+     * Display network admin notices
+     */
+    public static function networkAdminNotices() {
+        if (!( self::getServiceRestUrl() && self::getServiceUrl() )) {
+            if (is_super_admin()) {
+                echo '<div class="error">';
+                echo '<p>' . sprintf(__('SocialSemanticServer location not set! Please visit the <a href="%s">network settings</a> page.', self::getTextDomain()), network_admin_url('settings.php?page=attacher')) . '</p>';
+                echo '</div>';
+            }
+        }
+    }
+
+    /**
+     * Checks if running multisite environent.
+     * @return boolean
+     */
+    public static function isMultisite() {
+        return function_exists( 'is_multisite' ) && is_multisite();
     }
 }

@@ -21,23 +21,53 @@
  * limitations under the License.
  */
 
-if ( !current_user_can( 'manage_options' ) ) {
+if ( !Attacher_Plugin::isMultisite() ) {
+    wp_die( __( 'Multisite support is not enabled!', Attacher_Plugin::getTextDomain() ) );
+}
+
+if ( !current_user_can( 'manage_network_options' ) ) {
     wp_die( __( 'Insufficient privileges.', Attacher_Plugin::getTextDomain() ) );
 }
+
+// The logic is taken from wp-admin/network/settings.php
+// As there does not seem to be any possibility of automation like it is
+// possible with general options pages.
+// Please notice the noheader=true in form action, this is there to prevent
+// header output and thus make it impossible to redirect after actions completes
+if ( $_POST ) {
+    check_admin_referer( 'siteoptions' );
+
+    $options = array(
+        'attacher_service_rest_url', 'attacher_service_url',
+    );
+
+    foreach ( $options as $option_name ) {
+        if ( ! isset($_POST[$option_name]) )
+            continue;
+        $value = wp_unslash( $_POST[$option_name] );
+        update_site_option( $option_name, $value );
+    }
+
+    wp_redirect( add_query_arg( 'updated', 'true', network_admin_url( 'settings.php?page=attacher' ) ) );
+    exit();
+}
 ?>
+
+<?php if ( isset( $_GET['updated'] ) ):?>
+<div id="message" class="updated"><p><?php _e( 'Options saved.', Attacher_Plugin::getTextDomain() ); ?></p></div>
+<?php endif; ?>
+
 <div class="wrap">
     <h2><?php _e( 'Attacher settings', Attacher_Plugin::getTextDomain() ); ?></h2> 
-    <form method="post" action="options.php">
-        <?php settings_fields( 'attacher-settings-group' ); ?>
-        <?php do_settings_sections ( 'attacher-settings-group' ); ?>
+    <form method="post" action="settings.php?page=attacher&noheader=true">
+        <?php wp_nonce_field( 'siteoptions' ); ?>
         
         <table class="form-table">
             <tbody>
-                <?php if ( !Attacher_Plugin::isMultisite() ): ?>
                 <tr valign="top">
                     <th scope="row"><?php _e( 'SocialSemanticServerREST URL', Attacher_Plugin::getTextDomain() ); ?></th>
                     <td>
-                        <input type="text" id="attacher_service_rest_url" name="attacher_service_rest_url" value="<?php echo get_option( 'attacher_service_rest_url', '' ); ?>" class="regular-text" />
+                        <input type="text" id="attacher_service_rest_url" name="attacher_service_rest_url" value="<?php echo get_site_option( 'attacher_service_rest_url', '' ); ?>" class="regular-text" />
                         <p class="description">
                             <?php _e( 'Add REST service URL followed by a slash. Example: http://example.com/ss-adapter-rest/', Attacher_Plugin::getTextDomain() ); ?>
                         </p>
@@ -47,25 +77,10 @@ if ( !current_user_can( 'manage_options' ) ) {
                 <tr valign="top">
                     <th scope="row"><?php _e( 'SocialSemanticServerClientSide URL', Attacher_Plugin::getTextDomain() ); ?></th>
                     <td>
-                        <input type="text" id="attacher_service_url" name="attacher_service_url" value="<?php echo get_option( 'attacher_service_url', '' ); ?>" class="regular-text" />
+                        <input type="text" id="attacher_service_url" name="attacher_service_url" value="<?php echo get_site_option( 'attacher_service_url', '' ); ?>" class="regular-text" />
                         <p class="description">
                             <?php _e( 'Add ClientSide API URL followed by a slash. Example: http://example.com/SocialSemanticServerClientSide/', Attacher_Plugin::getTextDomain() ); ?>
                         </p>
-                    </td>
-                </tr>
-                <?php endif; ?>
-                
-                <tr valign="top">
-                    <th scope="row"><?php _e( 'SocialSemanticServer Username', Attacher_Plugin::getTextDomain() ); ?></th>
-                    <td>
-                        <input type="text" id="attacher_service_username" name="attacher_service_username" value="<?php echo get_option( 'attacher_service_username', '' ); ?>" class="regular-text" />
-                    </td>
-                </tr>
-                
-                <tr valign="top">
-                    <th scope="row"><?php _e( 'SocialSemanticServer Password', Attacher_Plugin::getTextDomain() ); ?></th>
-                    <td>
-                        <input type="text" id="attacher_service_password" name="attacher_service_password" value="<?php echo get_option( 'attacher_service_password', '' ); ?>" class="regular-text" />
                     </td>
                 </tr>
             </tbody>

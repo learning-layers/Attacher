@@ -133,9 +133,6 @@ function attacher_service_get_collection_with_entries(callback, error_callback, 
  * @param {array}       tag_labels      Array of tag labels
  */
 function attacher_service_search_tags_within_entity(callback, error_callback, entity_uri, tag_labels) {
-    if (!user) {
-        user = AttacherData.user;
-    }
     new SSSearch(
             function(result) {
                 callback(result.entities);
