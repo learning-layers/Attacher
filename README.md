@@ -5,6 +5,17 @@ Attacher is a WordPress plugin for communication with Social Semantic Server.
 Latest versions of WordPress are supported. Current version used in development
 is 3.9.
 
+Works with both MultiUser and non-MultiUser setups. The service credentials are
+stored at the blog level (the system assumes that there is one Service user per
+blog). In case of MU installation the configuration of Service and JS Client
+locations is done by the Network Administrator.
+
+Social Semantic Server Requirements
+===================================
+
+* Social Semantic Server - current master branch
+* Social Semantic Server Client Side - current master branch
+
 Source Code
 ===========
 
@@ -12,8 +23,7 @@ Source Code
 
 Limitations
 ===========
-1. Assumes one WordPress install per user because of the credentials
-information.
+1. Assumes one Service user per blog.
 2. Downloading linked files would only work in latest versions of Chrome and
 Opera.
 3. Exposes user credentials to an anonymous user through the usage of JS API
