@@ -139,10 +139,18 @@ class Attacher_Plugin {
         global $post;
 
         if ( $post && ( self::getServiceUrl() && self::getServiceUsername() && self::getServicePassword() ) ) {
+            $username = self::getServiceUsername();
+            $password = self::getServicePassword();
+            
+            $credentials = self::getServiceCredentialsForCurrentUser();
+            if ( $credentials && $credentials['username'] && $credentials['password'] ) {
+                $username = $credentials['username'];
+                $password = $credentials['password'];
+            }
             wp_register_script('attacher-service', ATTACHER_PLUGIN_URL . 'js/service.js');
             wp_localize_script('attacher-service', 'AttacherData', array(
-                'service_username' => self::getServiceUsername(),
-                'service_password' => self::getServicePassword(),
+                'service_username' => $username,
+                'service_password' => $password,
                 'user_ip' => preg_replace( '/[^0-9a-fA-F:., ]/', '',$_SERVER['REMOTE_ADDR'] ),
                 'home_url' => home_url(),
                 'is_user_logged_in' => is_user_logged_in() ? 1 : 0,
@@ -426,5 +434,33 @@ class Attacher_Plugin {
      */
     public static function isMultisite() {
         return function_exists( 'is_multisite' ) && is_multisite();
+    }
+    
+    /**
+     * Returns currently logged in user service credentials for multisite case.
+     * If credentials could not be found, a false is returned. In case user has
+     * multiple blogs, the first set of existing credentials is taken.
+     * @return mixed
+     */
+    public static function getServiceCredentialsForCurrentUser() {
+        if ( self::isMultisite() && is_user_logged_in() ) {
+            $current_user = wp_get_current_user();
+            $user_blogs = get_blogs_of_user($current_user->ID);
+            
+            if ( is_array( $user_blogs) && sizeof($user_blogs) > 0 ) {
+                foreach ( $user_blogs as $single_blog ) {
+                    $username = get_blog_option( $single_blog->userblog_id, 'attacher_service_username' );
+                    $password = get_blog_option( $single_blog->userblog_id, 'attacher_service_password' );
+                    if ( $username && $password ) {
+                        return array(
+                            'username' => $username,
+                            'password' => $password,
+                        );
+                    }
+                }
+            }
+            
+            return false;
+        }
     }
 }

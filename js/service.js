@@ -190,6 +190,8 @@ function attacher_service_authenticate(callback, error_callback) {
  * @param {string       label           Resource label (used for downloaded file name)
  */
 function attacher_service_download_file(error_callback, uri, label) {
+    // XXX Might make sense to first make call to SSEntityDescGet, that would provide
+    // the title and then call the download functionality
     // The solution might be to first call SSFileExtGet, and only then the file download code
     new SSFileExtGet(
             function(result) {
