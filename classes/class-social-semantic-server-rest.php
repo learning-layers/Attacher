@@ -132,6 +132,9 @@ class Social_Semantic_Server_Rest {
             return $result;
         } else {
             if ( 200 == $result['response']['code'] ) {
+                // There is a special case of file download that has to be
+                // handled with a different logic (the response contains file
+                // data not a JSON encoded string.
                 if ($result['headers']['content-type'] === 'application/json') {
                     return $this->checkRequestBodyForErrorsAndReturn( $result['body'] );
                 } else {
@@ -393,6 +396,11 @@ class Social_Semantic_Server_Rest {
         return $this->makeRequest( 'entityPublicSet', $body );
     }
     
+    /**
+     * Download the file from the server.
+     * @param string $file A URI of the file resource
+     * @return mixed A contents of the file on success or a WP_Error
+     */
     public function fileDownload( $file ) {
         $body = array(
             self::SC_KEY => $this->key,

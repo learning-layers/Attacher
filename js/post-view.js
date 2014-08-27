@@ -25,13 +25,28 @@
  */
 (function($) {
     /**
+     * A function to display an error to the user.
+     * @param {string} message Optional message to display.
+     */
+    function attacher_service_error(message) {
+        if (!message) {
+            message = 'SocialSemanticServer Communication Error';
+        }
+        alert(message);
+    }
+    
+    /**
      * Initialize downloadable files found within the body
      * @param {object} holder jQuery selector
      */
     function attacher_initialize_downloadable_files(holder) {
         holder.find('a.attacher-downloadable-file').on('click', function(e) {
             e.preventDefault();
-            var download_url = AttacherData.home_url + '?attacher_file_download=' + encodeURIComponent($(this).attr('href'));
+            var download_url = AttacherData.home_url
+                    + '?attacher_file_download='
+                    + encodeURIComponent($(this).attr('href'))
+                    + '&_wpnonce='
+                    + AttacherData.nonce;
             var a = document.createElement("a");
             a.href = download_url;
             a.target = '_blank';
@@ -48,9 +63,13 @@
     function attacher_add_update_raiting(holder, post_uri) {
         var data = {
             action : 'rating_overall_get',
-            entity : post_uri
+            entity : post_uri,
+            security : AttacherData.nonce
         };
         $.post(AttacherData.ajax_url, data, function(result) {
+            if (result === '-1') {
+                return;
+            }
             if ( result.status === -1 ) {
                 attacher_service_error();
                 return;
@@ -82,11 +101,15 @@
                 var data = {
                     action : 'rating_set',
                     entity : post_uri,
-                    score : $(this).data('score')
+                    score : $(this).data('score'),
+                    security : AttacherData.nonce
                 };
                 
                 $.post(AttacherData.ajax_url, data, function(result) {
-                    if ( result.status === -1 ) {
+                    if ( result === '-1' ) {
+                        return;
+                    }
+                    if ( result.status === '-1' ) {
                         attacher_service_error();
                         return;
                     }
@@ -95,42 +118,6 @@
                 });
             });
         });
-        /*attacher_service_raiting_overall_get(function(result) {
-            holder.find('.attacher-raiting').remove();
-            var raiting_html = '<div class="attacher-raiting">';
-            for (var i = 1; i <= 5; i++) {
-                if (result.ratingOverall.score >= i) {
-                    raiting_html += '<a href="#" data-score="' + i + '"><div class="dashicons dashicons-star-filled"></div></a>';
-                } else {
-                    raiting_html += '<a href="#" data-score="' + i + '"><div class="dashicons dashicons-star-empty"></div></a>';
-                }
-            }
-            raiting_html += '<div class="attacher-raiting-frequency">(' + result.ratingOverall.frequ + ')</div>';
-            raiting_html += '</div>';
-            holder.append(raiting_html);
-
-            holder.find('.attacher-raiting a').on('click', function(e) {
-                e.preventDefault();
-                var score = $(this).data('score');
-                var user_uri = AttacherData.user;
-                // In case of anonymous user add IP to URI
-                if ('1' !== AttacherData.is_user_logged_in) {
-                    user_uri += '_' + AttacherData.user_ip;
-                }
-                new SSRatingSet(
-                        function(result) {
-                            attacher_add_update_raiting(holder, post_uri);
-                        },
-                        function(result) {
-                            attacher_service_error();
-                        },
-                        user_uri,
-                        AttacherData.key,
-                        post_uri,
-                        score
-                        );
-            });
-        }, attacher_service_error, post_uri);*/
     }
     
     /**
@@ -157,10 +144,14 @@
 
     $(document).ready(function() {
         var data = {
-            action : 'connection_established'
+            action : 'connection_established',
+            security : AttacherData.nonce
         };
         $.post(AttacherData.ajax_url, data, function(result) {
-            if (result.status === -1) {
+            if (result === '-1') {
+                return;
+            }
+            if (result.status === '-1') {
                 attacher_service_error();
             }
             

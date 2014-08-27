@@ -150,16 +150,13 @@ class Attacher_Plugin {
         global $post;
 
         if ( $post && ( self::getServiceUrl() && self::getServiceUsername() && self::getServicePassword() ) ) {            
-            wp_register_script('attacher-service', ATTACHER_PLUGIN_URL . 'js/service.js');
-            wp_localize_script('attacher-service', 'AttacherData', array(
-                //'user_ip' => preg_replace( '/[^0-9a-fA-F:., ]/', '',$_SERVER['REMOTE_ADDR'] ),
+            wp_register_script( 'attacher-post-view', ATTACHER_PLUGIN_URL . 'js/post-view.js', array( 'jquery' ) );
+            wp_localize_script('attacher-post-view', 'AttacherData', array(
                 'home_url' => home_url(),
                 'is_user_logged_in' => is_user_logged_in() ? 1 : 0,
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
+                'nonce' => wp_create_nonce( 'attacher-service-call' ),
             ));
-            wp_enqueue_script( 'attacher-service' );
-            self::enqueueSemanticServerClientSideScripts();
-            wp_register_script( 'attacher-post-view', ATTACHER_PLUGIN_URL . 'js/post-view.js', array( 'jquery' ) );
             wp_enqueue_script( 'attacher-post-view' );
             
             wp_register_style( 'attacher-post-view', ATTACHER_PLUGIN_URL . 'css/post-view.css', array( 'dashicons' ) );
@@ -470,6 +467,7 @@ class Attacher_Plugin {
      * Responds to service if connection could be established.
      */
     public function ajaxConnectionEstablished() {
+        check_ajax_referer('attacher-service-call', 'security');
         $service = new Social_Semantic_Server_Rest(
                 self::getServiceRestUrl(),
                 self::getServiceUsername(),
@@ -488,10 +486,12 @@ class Attacher_Plugin {
         ));
     }
     
+    /**
+     * Responds with overall rating information for an entity.
+     * Responds with an error status if rating could not be fetched.
+     */
     public function ajaxRatingOverallGet() {
-        //check_ajax_referer('attacher-post-view-nonce', 'security');
-        // XXX Need to check that entity URL is provided
-        // XXX Need to check if credentials are provided
+        check_ajax_referer('attacher-service-call', 'security');
         $service = new Social_Semantic_Server_Rest(
                 self::getServiceRestUrl(),
                 self::getServiceUsername(),
@@ -508,7 +508,7 @@ class Attacher_Plugin {
         
         if ($response) {
             wp_send_json(array(
-                'status' => 0,
+                'status' => 1,
                 'frequ' => $response->frequ,
                 'score' => $response->score,
             ));
@@ -520,10 +520,11 @@ class Attacher_Plugin {
         }
     }
     
+    /**
+     * Sets the rating of an entity.
+     */
     public function ajaxRatingSet() {
-        // XXX The case with anonymous ratings is not being handled
-        //check_ajax_referer('attacher-post-view-nonce', 'security');
-        // XXX Need to check that entity URL is provided
+        check_ajax_referer('attacher-service-call', 'security');
         $username = self::getServiceUsername();
         $password = self::getServicePassword();
 
@@ -549,7 +550,7 @@ class Attacher_Plugin {
         
         if ($response === true) {
             wp_send_json(array(
-            'status' => 0,
+            'status' => 1,
             ));
         } else {
             wp_send_json(array(
@@ -560,9 +561,9 @@ class Attacher_Plugin {
     }
     
     /**
-     * XXX Missing docstring
-     * @param type $qvars
-     * @return string
+     * Extend query vars with custom ones.
+     * @param arrat $qvars Array of query vars
+     * @return array
      */
     public function addQueryVars( $qvars ) {
         $qvars['attacher_file_download'] = 'attacher_file_download';
@@ -570,7 +571,8 @@ class Attacher_Plugin {
     }
     
     /**
-     * XXX Missing docstring
+     * Use custom query variables to determine a special case and initialize
+     * a file download if possible.
      * @global object $wp_query WP_Query object
      */
     public function downloadFile() {
@@ -579,6 +581,10 @@ class Attacher_Plugin {
         $entity_uri = $wp_query->get( 'attacher_file_download' );
         
         if ( $entity_uri ) {
+            if ( !( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'attacher-service-call' ) ) ) {
+                wp_die( __( 'Security check failure!', self::getTextDomain() ) );
+            }
+            
             $service = new Social_Semantic_Server_Rest(
                 self::getServiceRestUrl(),
                 self::getServiceUsername(),
@@ -594,13 +600,18 @@ class Attacher_Plugin {
             }
             
             if ( !( isset($entity->mimeType) && isset($entity->fileExt) ) ) {
-                wp_die( __( 'Not a file entity!', self::getTextDomain() ) );
+                wp_die( __( 'The entity has not file attached!', self::getTextDomain() ) );
             }
             
             $filename = $entity->label;
             $mime_type = $entity->mimeType;
             $file_extension = $entity->fileExt;
-            // XXX check if file ends with extension
+            
+            // Check if file name has the right extension, append one if it does
+            // not
+            if ( substr( $filename, -strlen('.' . $file_extension) ) !== '.' . $file_extension ) {
+                $filename = $filename . '.' . $file_extension;
+            }
             
             $response = $service->fileDownload( $entity_uri );
                         
