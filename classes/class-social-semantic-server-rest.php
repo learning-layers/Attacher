@@ -46,6 +46,7 @@ class Social_Semantic_Server_Rest {
     const SC_VALUE = 'value';
     const SC_DESCRIPTION = 'description';
     const SC_COMMENTS = 'comments';
+    const SC_FILE = 'file';
     
     private $uri;
     private $username;
@@ -131,7 +132,11 @@ class Social_Semantic_Server_Rest {
             return $result;
         } else {
             if ( 200 == $result['response']['code'] ) {
-                return $this->checkRequestBodyForErrorsAndReturn( $result['body'] );
+                if ($result['headers']['content-type'] === 'application/json') {
+                    return $this->checkRequestBodyForErrorsAndReturn( $result['body'] );
+                } else {
+                    return $result['body'];
+                }
             } else {
                 $this->logError( $result, $body ); 
                 return new WP_Error( $result['response']['code'], 'Got response code error' );
@@ -290,13 +295,16 @@ class Social_Semantic_Server_Rest {
     
     /**
      * Get and additional information for an entity.
-     * @param string    $entity          Entity URI
-     * @param boolean   $getTags        Flag to include tags
-     * @param boolean   $getOverallRating   Flag to include raiting information
-     * @param boolean   $getDiscs            Flag to include discussions
+     * @param string    $entity           Entity URI
+     * @param boolean   $getTags          Flag to include tags
+     * @param boolean   $getOverallRating Flag to include raiting information
+     * @param boolean   $getDiscs         Flag to include discussions
+     * @param boolean   $getUEs           Flag to include user events
+     * @param boolean   $getThumb         Flag to include thumbnail
+     * @param boolean   $getFlags         Flag to include flags  
      * @return mixed
      */
-    public function entityDescGet( $entity, $getTags = true, $getOverallRating = true, $getDiscs = true) {
+    public function entityDescGet( $entity, $getTags = true, $getOverallRating = true, $getDiscs = true, $getUEs = false, $getThumb = false, $getFlags = false) {
         $body = array(
             self::SC_KEY => $this->key,
             self::SC_USER => $this->user,
@@ -348,6 +356,28 @@ class Social_Semantic_Server_Rest {
     }
     
     /**
+     * Get overall rating of an entity.
+     * @param string $entity
+     * @return boolean|object
+     */
+    public function ratingOverallGet( $entity ) {
+        $body = array(
+            self::SC_KEY => $this->key,
+            self::SC_USER => $this->user,
+            self::SC_OP => 'ratingOverallGet',
+            self::SC_ENTITY => $entity,
+        );
+        
+        $result = $this->makeRequest( 'ratingOverallGet', $body );
+        
+        if ( ! is_wp_error( $result ) ) {
+            return $result->{$result->op}->ratingOverall;
+        }
+        
+        return false;
+    }
+    
+    /**
      * Make entity public (mostly applicable to a collection).
      * @param string $entity Entity URI
      * @return mixed
@@ -361,5 +391,16 @@ class Social_Semantic_Server_Rest {
         );
         
         return $this->makeRequest( 'entityPublicSet', $body );
-    }    
+    }
+    
+    public function fileDownload( $file ) {
+        $body = array(
+            self::SC_KEY => $this->key,
+            self::SC_USER => $this->user,
+            self::SC_OP => 'fileDownload',
+            self::SC_FILE => $file,
+        );
+        
+        return $this->makeRequest( 'fileDownload', $body );
+    }
 }

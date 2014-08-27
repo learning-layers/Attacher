@@ -61,6 +61,9 @@ class Attacher_Plugin {
         
         add_action( 'wp_enqueue_scripts', array( 'Attacher_Plugin', 'enqueueScripts' ) );
         
+        add_action( 'template_redirect', array( 'Attacher_Plugin', 'downloadFile' ) );
+        add_filter( 'query_vars', array( 'Attacher_Plugin', 'addQueryVars' ) );
+        
         if ( is_admin() ) {
             add_action( 'add_meta_boxes', array( 'Attacher_Plugin', 'addMetaBoxes' ) );
             add_action( 'admin_enqueue_scripts', array( 'Attacher_Plugin', 'adminEnqueueScripts' ) );
@@ -70,6 +73,14 @@ class Attacher_Plugin {
             add_action( 'network_admin_menu', array( 'Attacher_Plugin', 'addNetworkMenuPages' ) );
             add_action( 'network_admin_notices', array( 'Attacher_Plugin', 'networkAdminNotices' ) );
         }
+        
+        // AJAX
+        add_action( 'wp_ajax_rating_overall_get', array( 'Attacher_Plugin', 'ajaxRatingOverallGet' ) );
+        add_action( 'wp_ajax_nopriv_rating_overall_get', array( 'Attacher_Plugin', 'ajaxRatingOverallGet' ) );
+        add_action( 'wp_ajax_rating_set', array( 'Attacher_Plugin', 'ajaxRatingSet' ) );
+        add_action( 'wp_ajax_nopriv_rating_set', array( 'Attacher_Plugin', 'ajaxRatingSet' ) );
+        add_action( 'wp_ajax_connection_established', array( 'Attacher_Plugin', 'ajaxConnectionEstablished' ) );
+        add_action( 'wp_ajax_nopriv_connection_established', array( 'Attacher_Plugin', 'ajaxConnectionEstablished' ) );
     }
     
     /**
@@ -138,22 +149,13 @@ class Attacher_Plugin {
     public static function enqueueScripts() {
         global $post;
 
-        if ( $post && ( self::getServiceUrl() && self::getServiceUsername() && self::getServicePassword() ) ) {
-            $username = self::getServiceUsername();
-            $password = self::getServicePassword();
-            
-            $credentials = self::getServiceCredentialsForCurrentUser();
-            if ( $credentials && $credentials['username'] && $credentials['password'] ) {
-                $username = $credentials['username'];
-                $password = $credentials['password'];
-            }
+        if ( $post && ( self::getServiceUrl() && self::getServiceUsername() && self::getServicePassword() ) ) {            
             wp_register_script('attacher-service', ATTACHER_PLUGIN_URL . 'js/service.js');
             wp_localize_script('attacher-service', 'AttacherData', array(
-                'service_username' => $username,
-                'service_password' => $password,
-                'user_ip' => preg_replace( '/[^0-9a-fA-F:., ]/', '',$_SERVER['REMOTE_ADDR'] ),
+                //'user_ip' => preg_replace( '/[^0-9a-fA-F:., ]/', '',$_SERVER['REMOTE_ADDR'] ),
                 'home_url' => home_url(),
                 'is_user_logged_in' => is_user_logged_in() ? 1 : 0,
+                'ajax_url' => admin_url( 'admin-ajax.php' ),
             ));
             wp_enqueue_script( 'attacher-service' );
             self::enqueueSemanticServerClientSideScripts();
@@ -461,6 +463,158 @@ class Attacher_Plugin {
             }
             
             return false;
+        }
+    }
+    
+    /**
+     * Responds to service if connection could be established.
+     */
+    public function ajaxConnectionEstablished() {
+        $service = new Social_Semantic_Server_Rest(
+                self::getServiceRestUrl(),
+                self::getServiceUsername(),
+                self::getServicePassword()
+                );
+        
+        if (!$service->isConnectionEstablished()) {
+            wp_send_json(array(
+                'status' => -1,
+                'message' => __( 'Connection could not be established!', self::getTextDomain() ),
+            ));
+        }
+        
+        wp_send_json(array(
+            'status' => 1,
+        ));
+    }
+    
+    public function ajaxRatingOverallGet() {
+        //check_ajax_referer('attacher-post-view-nonce', 'security');
+        // XXX Need to check that entity URL is provided
+        // XXX Need to check if credentials are provided
+        $service = new Social_Semantic_Server_Rest(
+                self::getServiceRestUrl(),
+                self::getServiceUsername(),
+                self::getServicePassword()
+                );
+        if (!$service->isConnectionEstablished()) {
+            wp_send_json(array(
+                'status' => -1,
+                'message' => __( 'Connection could not be established!', self::getTextDomain() ),
+            ));
+        }
+        
+        $response = $service->ratingOverallGet( $_POST['entity'] );
+        
+        if ($response) {
+            wp_send_json(array(
+                'status' => 0,
+                'frequ' => $response->frequ,
+                'score' => $response->score,
+            ));
+        } else {
+            wp_send_json(array(
+                'status' => -1,
+                'message' => __( 'An error occured. Could not get the rating!', self::getTextDomain() ),
+            ));
+        }
+    }
+    
+    public function ajaxRatingSet() {
+        // XXX The case with anonymous ratings is not being handled
+        //check_ajax_referer('attacher-post-view-nonce', 'security');
+        // XXX Need to check that entity URL is provided
+        $username = self::getServiceUsername();
+        $password = self::getServicePassword();
+
+        $credentials = self::getServiceCredentialsForCurrentUser();
+        if ($credentials && $credentials['username'] && $credentials['password']) {
+            $username = $credentials['username'];
+            $password = $credentials['password'];
+        }
+        
+        $service = new Social_Semantic_Server_Rest(
+                self::getServiceRestUrl(),
+                $username,
+                $password
+                );
+        if (!$service->isConnectionEstablished()) {
+            wp_send_json(array(
+                'status' => -1,
+                'message' => __( 'Connection could not be established!', self::getTextDomain() ),
+            ));
+        }
+        
+        $response = $service->ratingSet( $_POST['entity'], $_POST['score']);
+        
+        if ($response === true) {
+            wp_send_json(array(
+            'status' => 0,
+            ));
+        } else {
+            wp_send_json(array(
+                'status' => -1,
+                'message' => __('An error occured. Rating could not be set!', self::getTextDomain() ),
+            ));
+        }
+    }
+    
+    /**
+     * XXX Missing docstring
+     * @param type $qvars
+     * @return string
+     */
+    public function addQueryVars( $qvars ) {
+        $qvars['attacher_file_download'] = 'attacher_file_download';
+        return $qvars;
+    }
+    
+    /**
+     * XXX Missing docstring
+     * @global object $wp_query WP_Query object
+     */
+    public function downloadFile() {
+        global $wp_query;
+        
+        $entity_uri = $wp_query->get( 'attacher_file_download' );
+        
+        if ( $entity_uri ) {
+            $service = new Social_Semantic_Server_Rest(
+                self::getServiceRestUrl(),
+                self::getServiceUsername(),
+                self::getServicePassword()
+                );
+            if ( !$service->isConnectionEstablished() ) {
+                wp_die( __( 'Connection could not be established!', self::getTextDomain() ) );
+            }
+            
+            $entity = $service->entityDescGet( $entity_uri, false, false, false, false, false, false);
+            if ( is_wp_error( $entity ) ) {
+                wp_die( __( 'Entity could not be loaded!', self::getTextDomain() ) );
+            }
+            
+            if ( !( isset($entity->mimeType) && isset($entity->fileExt) ) ) {
+                wp_die( __( 'Not a file entity!', self::getTextDomain() ) );
+            }
+            
+            $filename = $entity->label;
+            $mime_type = $entity->mimeType;
+            $file_extension = $entity->fileExt;
+            // XXX check if file ends with extension
+            
+            $response = $service->fileDownload( $entity_uri );
+                        
+            if ( is_wp_error( $response ) ) {
+                wp_die( __( 'File could not be downloaded!', self::getTextDomain() ) );
+            }
+            
+            header("Pragma: public");
+            header("Expires: -1");
+            header("Cache-Control: public, must-revalidate, post-check=0, pre-check=0");
+            header('Content-Type: ' . $mime_type . '');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            echo $response;
+            exit;
         }
     }
 }

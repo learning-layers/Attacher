@@ -198,6 +198,7 @@ function attacher_service_download_file(error_callback, uri, label) {
                 var mimeType = result.fileExt;
                 new SSFileDownload(
                         function(result) {
+                            console.log(result);
                             var a = document.createElement("a");
 
                             if (jSGlobals.endsWith(label, "." + mimeType)) {
