@@ -111,34 +111,45 @@ class Attacher_Plugin {
      * @param WP_Post $post Post object
      */
     public static function addResourcesMetaBox( $post ) {
-        echo '<div class="attacher-container attacher-collection-container">';
+        echo '<div class="attacher-container attacher-tagcloud-select-container">';
             echo '<label>';
-                echo '<span>';
-                    echo __( 'Collections', self::getTextDomain() );
-                echo '</span>';
+                echo __( 'Tagcloud select', self::getTextDomain() );
             echo '</label>';
-            echo '<select name="attacher-collection">';
-            echo '</select>';
+            echo '<input type="radio" name="tagcloud-select" value="my" checked="checked" />';
+            echo __( 'My tags', self::getTextDomain() );
+            echo '&nbsp;';
+            echo '<input type="radio" name="tagcloud-select" value="others" />';
+            echo __( 'All the tags', self::getTextDomain() );
         echo '</div>';
         
-        echo '<div class="attacher-container attacher-collection-tagcloud-container">';
+        echo '<div class="attacher-container attacher-tagcloud-container">';
             echo '<label>';
                 echo '<span>';
                     echo __( 'Tags', self::getTextDomain() );
                 echo '</span>';
             echo '</label>';
-            echo '<div class="attacher-collection-tagcloud">';
+            
+            echo '<div class="attacher-tagclud attacher-my-tagcloud">';
+            echo '</div>';
+            
+            echo '<div class="attacher-tagcloud attacher-all-tagcloud" style="display:none;">';
             echo '</div>';
         echo '</div>';
         
-        echo '<div class="attacher-container attacher-collection-resources-container">';
+        echo '<div class="attacher-container attacher-resources-container">';
             echo '<label>';
                 echo '<span>';
-                    echo __( 'Resources', self::getTextDomain() );
+                    echo __( 'Your resources related to this tag', self::getTextDomain() );
                 echo '</span>';
             echo '</label>';
-            echo '<ul class="attacher-collection-resources">';
+            echo '<ul class="attacher-my-resources">';
             echo '</div>';
+            
+            echo '<label>';
+                echo __( 'Other people also used this tag to describe the following resources', self::getTextDomain() );
+            echo '</label>';
+            echo '<ul class="attacher-others-resources">';
+            echo '</ul>';
         echo '</div>';
     }
     

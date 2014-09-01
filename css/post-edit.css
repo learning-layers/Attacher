@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-.attacher-collection-tagcloud a.selected {
+.attacher-tagcloud a.selected {
     color: red;
 }
 
@@ -52,14 +52,14 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-#attacher-resources .attacher-collection-tagcloud-container label:before {
+#attacher-resources .attacher-tagcloud-container label:before {
     content: '\f479';
 }
 
-#attacher-resources .attacher-collection-resources-container label:before {
+#attacher-resources .attacher-resources-container label:before {
     content: '\f163';
 }
 
-#attacher-resources .attacher-collection-resources-container a.attacher-resource-private {
+#attacher-resources .attacher-resources-container a.attacher-resource-private {
     color: orange;
 }

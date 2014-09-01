@@ -69,60 +69,16 @@
             attacher_service_download_file(attacher_service_error, $(this).attr('href'), $(this).data('label'));
         });
     }
-
-    /**
-     * Callback that populates collections select. Used by service call.
-     * @param {object} result Service call result object
-     */
-    function attacher_populate_collections(result) {
-        /**
-         * Callback that populates tagcloud
-         * @param {object} result Service call result object
-         */
-        function deal_with_tags(result) {
-            var collections_select = $('#attacher-resources').find('select[name="attacher-collection"]');
-            var collection_tagcloud = $('#attacher-resources').find('.attacher-collection-tagcloud');
-            var collection_resources = $('#attacher-resources').find('.attacher-collection-resources');
-
-
-            if (result.tagFrequs) {
-                var fontMin = 10;
-                var fontMax = 20;
-                var frequMin = 1;
-                var frequMax = 1;
-                $.each(result.tagFrequs, function(key, tag) {
-                    if (0 === key) {
-                        frequMin = tag.frequ;
-                        frequMax = tag.frequ;
-                    }
-                    if (tag.frequ > frequMax) {
-                        frequMax = tag.frequ;
-                    } else if (tag.frequ < frequMin) {
-                        frequMin = tag.frequ;
-                    }
-                });
-                $.each(result.tagFrequs, function(key, tag) {
-                    var fontSize = (tag.frequ == frequMin) ? fontMin : (tag.frequ / frequMax) * (fontMax - fontMin) + fontMin;
-                    collection_tagcloud.append(' <a href="#" data-tag="' + tag.label + '" data-frequ="' + tag.frequ + '" style="font-size:' + fontSize + 'pt;">' + tag.label + ' (' + tag.frequ + ')</a>');
-                });
-
-                collection_tagcloud.find('a').on('click', function(e) {
-                    e.preventDefault();
-                    collection_resources.empty();
-                    collection_tagcloud.find('a').removeClass('selected');
-                    $(e.target).addClass('selected');
-
-                    attacher_service_search_tags_within_entity(deal_with_resources, attacher_service_error, collections_select.val(), [$(this).data('tag')]);
-                });
-            }
-        }
-
+    
+    function attacher_populate_tagcloud(tagcloud, tags) {
+        
         /**
          * Callback that populates resources
          * @param {object} result   Service call result object
          */
         function deal_with_resources(resources) {
-            var collection_resources = $('#attacher-resources').find('.attacher-collection-resources');
+            var my_resources = $('#attacher-resources').find('.attacher-my-resources');
+            var others_resources = $('#attacher-resources').find('.attacher-others-resources');
 
             if (resources) {
                 $.each(resources, function(key, entry) {
@@ -156,58 +112,88 @@
                         } else if (sSGlobals.spaceShared === space) {
                             resource_class += ' attacher-resource-shared';
                         }
-                        collection_resources.append('<li><a href="' + entry.id + '" target="_blank" class="' + resource_class + '" data-label="' + entry.label + '">' + entry.label + '</a></li>');
+                        if (entry.author === AttacherData.user) {
+                            my_resources.append('<li><a href="' + entry.id + '" target="_blank" class="' + resource_class + '" data-label="' + entry.label + '">' + entry.label + '</a></li>');
+                        } else {
+                            others_resources.append('<li><a href="' + entry.id + '" target="_blank" class="' + resource_class + '" data-label="' + entry.label + '">' + entry.label + '</a></li>');
+                        }
                     }
                 });
-                attacher_initialize_draggable(collection_resources);
-                attacher_initialize_downloadable_files(collection_resources);
+                attacher_initialize_draggable(my_resources);
+                attacher_initialize_downloadable_files(my_resources);
+                attacher_initialize_draggable(others_resources);
+                attacher_initialize_downloadable_files(others_resources);
             }
-        }
-
-        var collections_select = $('#attacher-resources').find('select[name="attacher-collection"]');
-        var collection_tagcloud = $('#attacher-resources').find('.attacher-collection-tagcloud');
-        var collection_resources = $('#attacher-resources').find('.attacher-collection-resources');
-
-        if (result.colls) {
-            $.each(result.colls, function(key, coll) {
-                collections_select.append('<option value="' + coll.id + '" data-author="' + coll.author + '">' + coll.label + '</option>');
-            });
         }
         
-        // Load shared collections available to the user
-        attacher_service_get_user_could_subscribe_collections(function(result) {
-            if (result.colls) {
-                $.each(result.colls, function(key, coll) {
-                    collections_select.append('<option value="' + coll.id + '" data-author="' + coll.author + '">' + coll.label + '</option>');
-                });
-            }
-        }, attacher_service_error);
+        var my_resources = $('#attacher-resources').find('.attacher-my-resources');
+        var others_resources = $('#attacher-resources').find('.attacher-others-resources');
+        var tagsWithFrequs = {};
+        var fontMin = 10;
+        var fontMax = 20;
+        var frequMin = null;
+        var frequMax = null;
 
-        collections_select.on('change', function() {
-            var collection_uri = $(this).val();
-            var collection_autor = $(this).find(':selected').data('author');
-
-            collection_tagcloud.empty();
-            collection_resources.empty();
-
-            if (collection_uri) {
-                attacher_service_get_collection_tags(deal_with_tags, attacher_service_error, collection_uri, collection_autor);
-                attacher_service_get_collection_with_entries(deal_with_resources, attacher_service_error, collection_uri);
+        $.each(tags, function(key, element) {
+            if (tagsWithFrequs.hasOwnProperty(element.label)) {
+                tagsWithFrequs[element.label].frequ += 1;
+            } else {
+                tagsWithFrequs[element.label] = {
+                    label: element.label,
+                    frequ: 1
+                };
             }
         });
 
-        collections_select.trigger('change');
+        $.each(tagsWithFrequs, function(key, element) {
+            if (element.frequ > frequMax) {
+                frequMax = element.frequ;
+            } else if (element.frequ < frequMin) {
+                frequMin = element.frequ;
+            }
+        });
+
+        $.each(tagsWithFrequs, function(key, tag) {
+            var fontSize = (tag.frequ === frequMin) ? fontMin : (tag.frequ / frequMax) * (fontMax - fontMin) + fontMin;
+            tagcloud.append(' <a href="#" data-tag="' + tag.label + '" data-frequ="' + tag.frequ + '" style="font-size:' + fontSize + 'pt;">' + tag.label + ' (' + tag.frequ + ')</a>');
+        });
+
+        tagcloud.find('a').on('click', function(e) {
+            e.preventDefault();
+            my_resources.empty();
+            others_resources.empty();
+            tagcloud.find('a').removeClass('selected');
+            $(e.target).addClass('selected');
+
+            attacher_service_search_tags(deal_with_resources, attacher_service_error, [$(this).data('tag')]);
+        });
+    }
+    
+    function attacher_populate_my_tagcloud(tags) {
+        var tagcloud = $('#attacher-resources').find('.attacher-my-tagcloud');
+        attacher_populate_tagcloud(tagcloud, tags);
+    }
+    
+    function attacher_populate_all_tagcloud(tags) {
+        var tagcloud = $('#attacher-resources').find('.attacher-all-tagcloud');
+        attacher_populate_tagcloud(tagcloud, tags);
     }
 
     /**
      * Gets collecions list and initializes as needed.
      */
-    function attacher_initialize_resources() {
-        attacher_service_get_user_collections(attacher_populate_collections, attacher_service_error);
+    function attacher_initialize_tagclouds() {
+        $('#attacher-resources').find('input[name="tagcloud-select"]').on('change', function() {
+            $('#attacher-resources').find('.attacher-my-tagcloud').slideToggle();
+            $('#attacher-resources').find('.attacher-all-tagcloud').slideToggle();
+        });
+
+        attacher_service_user_tags_get(attacher_populate_my_tagcloud, attacher_service_error, AttacherData.user);
+        attacher_service_all_tags_get(attacher_populate_all_tagcloud, attacher_service_error);
     }
 
     $(document).ready(function() {
-        attacher_service_authenticate(attacher_initialize_resources, attacher_service_error);
+        attacher_service_authenticate(attacher_initialize_tagclouds, attacher_service_error);
         attacher_initialize_droppable($('#wp-content-editor-container'));
     });
 })(jQuery);
