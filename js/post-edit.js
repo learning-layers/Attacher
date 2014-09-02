@@ -146,18 +146,24 @@
                 };
             }
         });
-
+        
+        var index = 0;
         $.each(tagsWithFrequs, function(key, element) {
+            if (index === 0) {
+                frequMax = element.frequ;
+                frequMin = element.frequ;
+            }
             if (element.frequ > frequMax) {
                 frequMax = element.frequ;
             } else if (element.frequ < frequMin) {
                 frequMin = element.frequ;
             }
+            index += 1;
         });
-
+        
         $.each(tagsWithFrequs, function(key, tag) {
             var fontSize = (tag.frequ === frequMin) ? fontMin : (tag.frequ / frequMax) * (fontMax - fontMin) + fontMin;
-            tagcloud.append(' <a href="#" data-tag="' + tag.label + '" data-frequ="' + tag.frequ + '" style="font-size:' + fontSize + 'pt;">' + tag.label + ' (' + tag.frequ + ')</a>');
+            tagcloud.append(' <a href="#" data-tag="' + tag.label + '" data-frequ="' + tag.frequ + '" style="font-size:' + fontSize + 'px;">' + tag.label + ' (' + tag.frequ + ')</a>');
         });
 
         tagcloud.find('a').on('click', function(e) {

@@ -52,6 +52,10 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+#attacher-resources .attacher-tagcloud-select-container .attacher-tagcloud-select-radios {
+    text-align: center;
+}
+
 #attacher-resources .attacher-tagcloud-select-container label:before {
     content: "\f176";
 }

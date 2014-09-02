@@ -115,11 +115,13 @@ class Attacher_Plugin {
             echo '<label>';
                 echo __( 'Tagcloud select', self::getTextDomain() );
             echo '</label>';
-            echo '<input type="radio" name="tagcloud-select" value="my" checked="checked" />';
-            echo __( 'My tags', self::getTextDomain() );
-            echo '&nbsp;';
-            echo '<input type="radio" name="tagcloud-select" value="others" />';
-            echo __( 'All the tags', self::getTextDomain() );
+            echo '<div class="attacher-tagcloud-select-radios">';
+                echo '<input type="radio" name="tagcloud-select" value="my" checked="checked" />';
+                echo __( 'My tags', self::getTextDomain() );
+                echo '&nbsp;&nbsp;';
+                echo '<input type="radio" name="tagcloud-select" value="others" />';
+                echo __( 'All the tags', self::getTextDomain() );
+            echo '</div>';
         echo '</div>';
         
         echo '<div class="attacher-container attacher-tagcloud-container">';
