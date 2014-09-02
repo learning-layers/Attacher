@@ -119,10 +119,12 @@
                         }
                     }
                 });
+                /*
                 attacher_initialize_draggable(my_resources);
                 attacher_initialize_downloadable_files(my_resources);
                 attacher_initialize_draggable(others_resources);
                 attacher_initialize_downloadable_files(others_resources);
+                */
             }
         }
         
