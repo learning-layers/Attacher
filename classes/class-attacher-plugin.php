@@ -138,7 +138,7 @@ class Attacher_Plugin {
                 echo '</span>';
             echo '</label>';
             echo '<ul class="attacher-collection-resources">';
-            echo '</div>';
+            echo '</ul>';
         echo '</div>';
     }
     
