@@ -10,6 +10,8 @@ stored at the blog level (the system assumes that there is one Service user per
 blog). In case of MU installation the configuration of Service and JS Client
 locations is done by the Network Administrator.
 
+**NB! This is a special version used for internal evaluation.**
+
 Social Semantic Server Requirements
 ===================================
 
@@ -43,19 +45,16 @@ service locations (administrator privileges needed).
 
 How Does it Work
 ================
-1. Adds a MetaBox to Post edit view that lists all user collections and any
-collections that have been marked as shared within the system.
-2. Selecting each collection shown a tagcloud that can be used to browse the
-tagged resources from specific collection (please note that user root collection
-will show a tagcloud for all user resources and it can be used to browse
-resources from multiple collections).
-  * Shared collections from other users do not affect the this tagcloud
+1. Adds a MetaBox to Post edit view that allows user to switch between two
+tagclouds. The default one consists of all user tags and the other one consists
+of all tags user within the system (excludes private tags by other users).
+2. Clicking on a tag will search the system for resources and show them in two
+lists. The first one will hold all the resources created by the user and the
+other one will hold all the resources created by others.
 3. Resources are draggable and can be dropped on the post content editor (please
-note that a resource anchor element is holding some additional information that
-would allow to trigger the file downloads in future).
-4. When a post is viewed, all the links pointing to uploaded files will have a
-listener that would trigger the download of a corresponding file.
-5. A user can also rate the post while it is being viewed. In case of MU
+note that default drag-and-drop is used, thus this will not add any additional
+information to the links; this will not allow to download uploaded files).
+4. A user can also rate the post while it is being viewed. In case of MU
 setup the credentials of the currently logged in user will be used (those will
 be extracted from the blogs owned by the user). A fallback to current blog
 credentials will be used instead.
