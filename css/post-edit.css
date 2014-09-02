@@ -52,6 +52,10 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+#attacher-resources .attacher-tagcloud-select-container label:before {
+    content: "\f176";
+}
+
 #attacher-resources .attacher-tagcloud-container label:before {
     content: '\f479';
 }

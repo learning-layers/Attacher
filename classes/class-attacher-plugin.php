@@ -129,7 +129,7 @@ class Attacher_Plugin {
                 echo '</span>';
             echo '</label>';
             
-            echo '<div class="attacher-tagclud attacher-my-tagcloud">';
+            echo '<div class="attacher-tagcloud attacher-my-tagcloud">';
             echo '</div>';
             
             echo '<div class="attacher-tagcloud attacher-all-tagcloud" style="display:none;">';
@@ -139,14 +139,16 @@ class Attacher_Plugin {
         echo '<div class="attacher-container attacher-resources-container">';
             echo '<label>';
                 echo '<span>';
-                    echo __( 'Your resources related to this tag', self::getTextDomain() );
+                    echo __( 'Your resources related to this tag:', self::getTextDomain() );
                 echo '</span>';
             echo '</label>';
             echo '<ul class="attacher-my-resources">';
-            echo '</div>';
+            echo '</ul>';
             
             echo '<label>';
-                echo __( 'Other people also used this tag to describe the following resources', self::getTextDomain() );
+                echo '<span>';
+                    echo __( 'Other people also used this tag to describe the following resources:', self::getTextDomain() );
+                echo '</span>';
             echo '</label>';
             echo '<ul class="attacher-others-resources">';
             echo '</ul>';

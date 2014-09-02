@@ -161,10 +161,11 @@
         });
 
         tagcloud.find('a').on('click', function(e) {
+            var all_tagclouds = $('#attacher-resources').find('.attacher-tagcloud');
             e.preventDefault();
             my_resources.empty();
             others_resources.empty();
-            tagcloud.find('a').removeClass('selected');
+            all_tagclouds.find('a').removeClass('selected');
             $(e.target).addClass('selected');
 
             attacher_service_search_tags(deal_with_resources, attacher_service_error, [$(this).data('tag')]);
