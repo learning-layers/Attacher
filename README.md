@@ -55,6 +55,7 @@ note that a resource anchor element is holding some additional information that
 would allow to trigger the file downloads in future).
 4. When a post is viewed, all the links pointing to uploaded files will have a
 listener that would trigger the download of a corresponding file.
-5. A user can also rate the post while it is being viewed (currently a hack will
-be used for unauthenticated users so that they could submit a rating, an IP
-address of the current user is added to construct unique creator URI).
+5. A user can also rate the post while it is being viewed. In case of MU
+setup the credentials of the currently logged in user will be used (those will
+be extracted from the blogs owned by the user). A fallback to current blog
+credentials will be used instead.
