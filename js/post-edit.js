@@ -70,10 +70,21 @@
         });
     }
     
+    /**
+     * Takes a tagclpud object and tags. Creates a unique tags holder with label
+     * and frequency for each tag.
+     * Calculates minimum and maximum frequency for tag and populates the
+     * tagcloud, registeres a click handler for each tag.
+     * @param {object} tagcloud jQuery object with tagcloud
+     * @param {array} tags      An array of tag objects (each one with data on
+     * entity, author, status and label; each tag could be represented multiple
+     * times).
+     */
     function attacher_populate_tagcloud(tagcloud, tags) {
         
         /**
-         * Callback that populates resources
+         * Callback that populates resources listings.
+         * Differenciates between my resources and ones by other users.
          * @param {object} result   Service call result object
          */
         function deal_with_resources(resources) {
@@ -104,14 +115,18 @@
                     
                     if ('coll' !== type) {
                         var resource_class = 'attacher-resource';
+                        
                         if ('file' == type) {
                             resource_class += ' attacher-downloadable-file';
                         }
+                        
                         if (sSGlobals.spacePrivate === space) {
                             resource_class += ' attacher-resource-private';
                         } else if (sSGlobals.spaceShared === space) {
                             resource_class += ' attacher-resource-shared';
                         }
+                        
+                        // Determine the resource listing to be used
                         if (entry.author === AttacherData.user) {
                             my_resources.append('<li><a href="' + entry.id + '" target="_blank" class="' + resource_class + '" data-label="' + entry.label + '">' + entry.label + '</a></li>');
                         } else {
@@ -178,18 +193,27 @@
         });
     }
     
+    /**
+     * A callback to populate tagcloud of current users tags.
+     * @param {array} tags
+     */
     function attacher_populate_my_tagcloud(tags) {
         var tagcloud = $('#attacher-resources').find('.attacher-my-tagcloud');
         attacher_populate_tagcloud(tagcloud, tags);
     }
     
+    /**
+     * A callback to populate tagcloud of all tags in the system.
+     * @param {array} tags
+     */
     function attacher_populate_all_tagcloud(tags) {
         var tagcloud = $('#attacher-resources').find('.attacher-all-tagcloud');
         attacher_populate_tagcloud(tagcloud, tags);
     }
 
     /**
-     * Gets collecions list and initializes as needed.
+     * A callback to populate tagclouds and initialialize tagcloud select
+     * functionality.
      */
     function attacher_initialize_tagclouds() {
         $('#attacher-resources').find('input[name="tagcloud-select"]').on('change', function() {
@@ -200,9 +224,13 @@
         attacher_service_user_tags_get(attacher_populate_my_tagcloud, attacher_service_error, AttacherData.user);
         attacher_service_all_tags_get(attacher_populate_all_tagcloud, attacher_service_error);
     }
-
+    
+    /**
+     * Try to authenticate with the service and run initialization in case of
+     * success.
+     */
     $(document).ready(function() {
         attacher_service_authenticate(attacher_initialize_tagclouds, attacher_service_error);
-        attacher_initialize_droppable($('#wp-content-editor-container'));
+        //attacher_initialize_droppable($('#wp-content-editor-container'));
     });
 })(jQuery);

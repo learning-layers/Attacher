@@ -404,9 +404,9 @@ class Attacher_Plugin {
      */
     public static function adminNotices() {
        
-        if (!( self::getServiceRestUrl() && self::getServiceUrl() )) {
-            if (self::isMultisite()) {
-                if (is_super_admin()) {
+        if ( ! ( self::getServiceRestUrl() && self::getServiceUrl() ) ) {
+            if ( self::isMultisite() ) {
+                if ( is_super_admin() ) {
                     echo '<div class="error">';
                     echo '<p>' . sprintf(__('SocialSemanticServer location not set! Please visit the <a href="%s">network settings</a> page.', self::getTextDomain()), network_admin_url('settings.php?page=attacher')) . '</p>';
                     echo '</div>';
@@ -433,7 +433,7 @@ class Attacher_Plugin {
      * Display network admin notices
      */
     public static function networkAdminNotices() {
-        if (!( self::getServiceRestUrl() && self::getServiceUrl() )) {
+        if ( ! ( self::getServiceRestUrl() && self::getServiceUrl() ) ) {
             if (is_super_admin()) {
                 echo '<div class="error">';
                 echo '<p>' . sprintf(__('SocialSemanticServer location not set! Please visit the <a href="%s">network settings</a> page.', self::getTextDomain()), network_admin_url('settings.php?page=attacher')) . '</p>';
