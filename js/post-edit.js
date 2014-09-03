@@ -32,7 +32,8 @@
         holder.find('li').draggable({
             appendTo: 'body',
             helper: 'clone',
-            scope: 'resources'
+            scope: 'resources',
+            iframeFix: true
         });
     }
 
