@@ -29,11 +29,12 @@
      * @param {object} holder jQuery selector Object
      */
     function attacher_initialize_draggable(holder) {
-        holder.find('li').draggable({
+        holder.find('li > a').draggable({
             appendTo: 'body',
             helper: 'clone',
-            scope: 'resources'
-        });
+            scope: 'resources',
+            iframeFix: true
+        });     
     }
 
     /**
@@ -47,7 +48,8 @@
             scope: 'resources',
             drop: function(event, ui) {
                 $(this).find('.placeholder').remove();
-                var tmp_a = ui.draggable.find('a');
+                var tmp_a = ui.draggable;
+                tmp_a.removeClass('ui-draggable');
                 var tmp_content = '<a href="' + tmp_a.attr('href') + '" target="_blank" data-label="' + tmp_a.data('label') + '" class="' + tmp_a.attr('class') + '">' + tmp_a.data('label') + '</a>';
                 // Handling both cases, tinymce active and inactive
                 if (!tinymce.activeEditor.isHidden()) {
@@ -134,12 +136,12 @@
                         }
                     }
                 });
-                /*
+                
                 attacher_initialize_draggable(my_resources);
                 attacher_initialize_downloadable_files(my_resources);
                 attacher_initialize_draggable(others_resources);
                 attacher_initialize_downloadable_files(others_resources);
-                */
+                
             }
         }
         
@@ -231,6 +233,6 @@
      */
     $(document).ready(function() {
         attacher_service_authenticate(attacher_initialize_tagclouds, attacher_service_error);
-        //attacher_initialize_droppable($('#wp-content-editor-container'));
+        attacher_initialize_droppable($('#wp-content-editor-container'));
     });
 })(jQuery);
