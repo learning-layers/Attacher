@@ -120,7 +120,7 @@ class Social_Semantic_Server_Rest {
      * @return mixed
      */
     private function makeRequest( $method, $body ) {
-        $request_url = "{$this->uri}rest/SSAdapterRest/{$method}/";
+        $request_url = "{$this->uri}/SSAdapterRest/{$method}/";
         
         $args['body'] = json_encode( $body );
         $args['headers']['content-type'] = 'application/json';
