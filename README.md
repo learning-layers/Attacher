@@ -15,8 +15,8 @@ locations is done by the Network Administrator.
 Social Semantic Server Requirements
 ===================================
 
-* Social Semantic Server - v4.1.0-alpha
-* Social Semantic Server Client Side - v5.1.0-alpha
+* Social Semantic Server - rc_5.1.0 branch
+* Social Semantic Server Client Side - rc_7.0.0 branch
 
 Source Code
 ===========
