@@ -57,6 +57,20 @@
                 } else {
                     QTags.insertContent(tmp_content);
                 }
+                // Add activity on drop
+                new SSActivityAdd(
+                        function(result) {
+                            // Do nothing
+                        },
+                        function(result) {
+                            attacher_service_error();
+                        },
+                        AttacherData.user,
+                        AttacherData.key,
+                        'cite',
+                        [],
+                        [tmp_a.attr('href')]
+                        );
             }
         });
     }
