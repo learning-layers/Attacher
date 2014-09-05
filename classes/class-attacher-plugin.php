@@ -347,7 +347,6 @@ class Attacher_Plugin {
             $existing_tags = array();
             if ( $entity->tags && sizeof( $entity->tags ) > 0 ) {
                 foreach( $entity->tags as $tag ) {
-                    
                     $existing_tags[] = $tag;
                 } 
             }

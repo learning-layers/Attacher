@@ -104,11 +104,11 @@ class Social_Semantic_Server_Rest {
      */
     private function checkRequestBodyForErrorsAndReturn( $body ) {
         $body = json_decode( $body );
-        if ( ! $body.error ) {
+        if ( ! $body->error ) {
             return $body;
         } else {
             $this->logError( $body );
-            return WP_Error( 'error', 'Got method call error' );
+            return new WP_Error( 'error', 'Got method call error' );
         }
     }
     
