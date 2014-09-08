@@ -352,6 +352,11 @@ class Attacher_Plugin {
             }
             
             $tags = wp_get_post_tags( $post->ID, array( 'fields' => 'names' ) );
+            // Trim tags and replace spaces with underscores
+            $tag_func = function($tag) {
+                return str_replace( ' ', '_', trim( $tag ) );
+            };
+            $tags = array_map($tag_func, $tags);
             
             $combined_tags = array_unique( array_merge( $existing_tags, $tags ) );
             if ( $combined_tags && sizeof( $combined_tags ) > 0 ) {
