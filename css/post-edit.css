@@ -60,6 +60,11 @@
     content: "\f176";
 }
 
+#attacher-resources .attacher-tagcloud-container .attacher-tagcloud {
+    max-height: 250px;
+    overflow-y: scroll;
+}
+
 #attacher-resources .attacher-tagcloud-container label:before {
     content: '\f479';
 }
@@ -68,6 +73,15 @@
     content: '\f163';
 }
 
+#attacher-resources .attacher-resources-container ul.attacher-my-resources,  #attacher-resources .attacher-resources-container ul.attacher-others-resources {
+    max-height: 150px;
+    overflow-y: scroll;
+}
+
+#attacher-resources .attacher-resources-container a.attacher-resource {
+    color: #447d37;
+}
+
 #attacher-resources .attacher-resources-container a.attacher-resource-private {
-    color: orange;
+    color: #f38717;
 }
