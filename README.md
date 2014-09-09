@@ -16,7 +16,7 @@ Social Semantic Server Requirements
 ===================================
 
 * Social Semantic Server - v6.0.0-alpha
-* Social Semantic Server Client Side - v7.0.0-alpha
+* Social Semantic Server Client Side - v8.0.0-alpha
 
 Source Code
 ===========
