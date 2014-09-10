@@ -62,7 +62,7 @@
 
 #attacher-resources .attacher-tagcloud-container .attacher-tagcloud {
     max-height: 250px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 #attacher-resources .attacher-tagcloud-container label:before {
@@ -75,7 +75,7 @@
 
 #attacher-resources .attacher-resources-container ul.attacher-my-resources,  #attacher-resources .attacher-resources-container ul.attacher-others-resources {
     max-height: 150px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 #attacher-resources .attacher-resources-container a.attacher-resource {
