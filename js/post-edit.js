@@ -194,7 +194,8 @@
         
         $.each(tagsWithFrequs, function(key, tag) {
             var fontSize = (tag.frequ === frequMin) ? fontMin : (tag.frequ / frequMax) * (fontMax - fontMin) + fontMin;
-            tagcloud.append(' <a href="#" data-tag="' + tag.label + '" data-frequ="' + tag.frequ + '" style="font-size:' + fontSize + 'px;">' + tag.label + ' (' + tag.frequ + ')</a>');
+            // Replace underscores with spaces
+            tagcloud.append(' <a href="#" data-tag="' + tag.label + '" data-frequ="' + tag.frequ + '" style="font-size:' + fontSize + 'px;">' + tag.label.replace(/_/g, ' ') + ' (' + tag.frequ + ')</a>');
         });
 
         tagcloud.find('a').on('click', function(e) {
