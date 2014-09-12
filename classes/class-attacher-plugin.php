@@ -293,7 +293,8 @@ class Attacher_Plugin {
             return;
         }
         
-        if ( 'post' == $post->post_type ) {
+        // Only send information in case of type 'post' and status 'publish'
+        if ( 'post' == $post->post_type && 'publish' == get_post_status( $post_id ) ) {
             if ( ! ( self::getServiceRestUrl() && self::getServiceUsername() && self::getServicePassword() ) ) {
                 return;
             }
@@ -306,7 +307,7 @@ class Attacher_Plugin {
                 error_log( 'NO SERVICE CONNECTION' );
                 return;
             }
-            
+                        
             $entity_uri = wp_get_shortlink( $post->ID );
             
             $root_collection = $service->collRootGet();
