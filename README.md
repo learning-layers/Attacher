@@ -15,7 +15,7 @@ locations is done by the Network Administrator.
 Social Semantic Server Requirements
 ===================================
 
-* Social Semantic Server - v6.0.0-alpha
+* Social Semantic Server - v6.0.1-alpha
 * Social Semantic Server Client Side - v8.0.0-alpha
 
 Source Code
@@ -46,7 +46,7 @@ service locations (administrator privileges needed).
 How Does it Work
 ================
 1. Adds a MetaBox to Post edit view that allows user to switch between two
-tagclouds. The default one consists of all user tags and the other one consists
+tag clouds. The default one consists of all user tags and the other one consists
 of all tags user within the system (excludes private tags by other users).
 2. Clicking on a tag will search the system for resources and show them in two
 lists. The first one will hold all the resources created by the user and the
@@ -58,3 +58,4 @@ information to the links; this will not allow to download uploaded files).
 setup the credentials of the currently logged in user will be used (those will
 be extracted from the blogs owned by the user). A fallback to current blog
 credentials will be used instead.
+5. Please note that only public posts are being submitted to the service.
