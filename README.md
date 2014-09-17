@@ -3,7 +3,9 @@ Attacher
 
 Attacher is a WordPress plugin for communication with Social Semantic Server.
 Latest versions of WordPress are supported. Current version used in development
-is 3.9.2.
+is 4.0.
+
+Supported versions: 3.9, 4.0.
 
 Works with both MultiUser and non-MultiUser setups. The service credentials are
 stored at the blog level (the system assumes that there is one Service user per
