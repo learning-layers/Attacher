@@ -186,7 +186,7 @@ class Attacher_Plugin {
     public static function adminEnqueueScripts( $hook ) {
         global $post;
         
-        if ( $hook == 'post-new.php' || $hook == 'post.php' && ( self::getServiceUrl() && self::getServiceUsername() && self::getServicePassword() ) ) {
+        if ( ( $hook == 'post-new.php' || $hook == 'post.php' ) && ( self::getServiceUrl() && self::getServiceUsername() && self::getServicePassword() ) ) {
             if ( $post && 'post' == $post->post_type ) {
                 wp_register_script( 'attacher-service', ATTACHER_PLUGIN_URL . 'js/service.js');
                 wp_localize_script( 'attacher-service', 'AttacherData', array(
